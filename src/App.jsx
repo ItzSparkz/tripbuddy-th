@@ -7,7 +7,7 @@ import {
   Star, Loader, DollarSign, FileText, Trash2, CreditCard, Search,
   BarChart2, Users, AlertCircle, Database, CalendarCheck, Clock, Ticket, Plane,
   Navigation, Calendar, Info, Building, Bus, Briefcase, Tag, FileImage, ExternalLink,
-  BedDouble, Car, Filter, Check, Upload
+  BedDouble, Car, Filter, Check, Upload, PlayCircle
 } from 'lucide-react';
 
 // ==========================================
@@ -31,7 +31,7 @@ const THAILAND_DATA = {
   central: { name: 'ภาคกลาง (22)', color: 'bg-yellow-100 text-yellow-800', provinces: [{ name: 'กรุงเทพมหานคร', desc: 'วัดพระแก้ว', highlight: 'วัดอรุณฯ' }, { name: 'พระนครศรีอยุธยา', desc: 'เมืองเก่า', highlight: 'วัดมหาธาตุ' }, { name: 'สระบุรี', desc: 'น้ำตก', highlight: 'น้ำตกเจ็ดสาวน้อย' }, { name: 'ลพบุรี', desc: 'ลิง', highlight: 'พระปรางค์สามยอด' }, { name: 'สิงห์บุรี', desc: 'บางระจัน', highlight: 'วัดพิกุลทอง' }, { name: 'ชัยนาท', desc: 'สวนนก', highlight: 'เขื่อนเจ้าพระยา' }, { name: 'อ่างทอง', desc: 'ตุ๊กตาชาววัง', highlight: 'วัดม่วง' }, { name: 'นครสวรรค์', desc: 'ปากน้ำโพ', highlight: 'บึงบอระเพ็ด' }, { name: 'อุทัยธานี', desc: 'วัดท่าซุง', highlight: 'วัดท่าซุง' }, { name: 'กำแพงเพชร', desc: 'กล้วยไข่', highlight: 'น้ำตกคลองลาน' }, { name: 'สุโขทัย', desc: 'มรดกโลก', highlight: 'อุทยานประวัติศาสตร์' }, { name: 'พิษณุโลก', desc: 'พระพุทธชินราช', highlight: 'วัดพระศรีรัตนมหาธาตุ' }, { name: 'พิจิตร', desc: 'ชาละวัน', highlight: 'บึงสีไฟ' }, { name: 'เพชรบูรณ์', desc: 'เขาค้อ', highlight: 'เขาค้อ' }, { name: 'สุพรรณบุรี', desc: 'มังกร', highlight: 'บึงฉวาก' }, { name: 'นครปฐม', desc: 'เจดีย์', highlight: 'องค์พระปฐมเจดีย์' }, { name: 'สมุทรสาคร', desc: 'มหาชัย', highlight: 'ตลาดทะเลไทย' }, { name: 'สมุทรสงคราม', desc: 'อัมพวา', highlight: 'ตลาดร่มหุบ' }, { name: 'นนทบุรี', desc: 'เกาะเกร็ด', highlight: 'เกาะเกร็ด' }, { name: 'ปทุมธานี', desc: 'เมืองบัว', highlight: 'วัดเจดีย์หอย' }, { name: 'สมุทรปราการ', desc: 'ปากน้ำ', highlight: 'บางกระเจ้า' }, { name: 'นครนายก', desc: 'เขื่อน', highlight: 'เขื่อนขุนด่านฯ' }] },
   east: { name: 'ภาคตะวันออก (7)', color: 'bg-blue-100 text-blue-800', provinces: [{ name: 'ชลบุรี', desc: 'พัทยา', highlight: 'เกาะล้าน' }, { name: 'ระยอง', desc: 'เสม็ด', highlight: 'สวนผลไม้' }, { name: 'จันทบุรี', desc: 'เนินนางพญา', highlight: 'จุดชมวิวเนินนางพญา' }, { name: 'ตราด', desc: 'เกาะช้าง', highlight: 'เกาะกูด' }, { name: 'ฉะเชิงเทรา', desc: 'หลวงพ่อโสธร', highlight: 'วัดโสธรวราราม' }, { name: 'ปราจีนบุรี', desc: 'ล่องแก่ง', highlight: 'แก่งหินเพิง' }, { name: 'สระแก้ว', desc: 'โรงเกลือ', highlight: 'ละลุ' }] },
   west: { name: 'ภาคตะวันตก (5)', color: 'bg-amber-100 text-amber-800', provinces: [{ name: 'กาญจนบุรี', desc: 'สะพานมอญ', highlight: 'สังขละบุรี' }, { name: 'ตาก', desc: 'ทีลอซู', highlight: 'น้ำตกทีลอซู' }, { name: 'ประจวบคีรีขันธ์', desc: 'หัวหิน', highlight: 'อ่าวมะนาว' }, { name: 'เพชรบุรี', desc: 'ชะอำ', highlight: 'หาดชะอำ' }, { name: 'ราชบุรี', desc: 'สวนผึ้ง', highlight: 'สวนผึ้ง' }] },
-  south: { name: 'ภาคใต้ (14)', color: 'bg-cyan-100 text-cyan-800', provinces: [{ name: 'ภูเก็ต', desc: 'แหลมพรหมเทพ', highlight: 'แหลมพรหมเทพ' }, { name: 'สุราษฎร์ธานี', desc: 'สมุย', highlight: 'เขื่อนเชี่ยวหลาน' }, { name: 'นครศรีธรรมราช', desc: 'ไอ้ไข่', highlight: 'วัดเจดีย์ (ไอ้ไข่)' }, { name: 'สงขลา', desc: 'หาดใหญ่', highlight: 'นางเงือกทอง' }, { name: 'กระบี่', desc: 'พีพี', highlight: 'สระมรกต' }, { name: 'พังงา', desc: 'เสม็ดนางชี', highlight: 'หมู่เกาะสิมิลัน' }, { name: 'ตรัง', desc: 'หมูย่าง', highlight: 'ถ้ำมรกต' }, { name: 'สตูล', desc: 'หลีเป๊ะ', highlight: 'เกาะหลีเป๊ะ' }, { name: 'ชุมพร', desc: 'หาดทรายรี', highlight: 'หาดทรายรี' }, { name: 'ระนอง', desc: 'บ่อน้ำร้อน', highlight: 'ภูเขาหญ้า' }, { name: 'พัทลุง', desc: 'ทะเลน้อย', highlight: 'ทะเลน้อย' }, { name: 'ยะลา', desc: 'เบตง', highlight: 'Skywalk อัยเยอร์เวง' }, { name: 'ปัตตานี', desc: 'มัสยิดกลาง', highlight: 'มัสยิดกลาง' }, { name: 'นราธิวาส', desc: 'น้ำตก', highlight: 'น้ำตกปาโจ' }] }
+  south: { name: 'ภาคใต้ (14)', color: 'bg-cyan-100 text-cyan-800', provinces: [{ name: 'ภูเก็ต', desc: 'แหลมพรหมเทพ', highlight: 'ป่าตอง' }, { name: 'สุราษฎร์ฯ', desc: 'สมุย', highlight: 'เขื่อนเชี่ยวหลาน' }, { name: 'กระบี่', desc: 'พีพี', highlight: 'สระมรกต' }, { name: 'พังงา', desc: 'เสม็ดนางชี', highlight: 'สิมิลัน' }, { name: 'ตรัง', desc: 'หมูย่าง', highlight: 'ถ้ำมรกต' }, { name: 'สตูล', desc: 'หลีเป๊ะ', highlight: 'หลีเป๊ะ' }, { name: 'ชุมพร', desc: 'หาดทรายรี', highlight: 'หาดทรายรี' }, { name: 'ระนอง', desc: 'บ่อน้ำร้อน', highlight: 'ภูเขาหญ้า' }, { name: 'พัทลุง', desc: 'ล่องแก่ง', highlight: 'ทะเลน้อย' }, { name: 'ยะลา', desc: 'เบตง', highlight: 'อัยเยอร์เวง' }] }
 };
 
 const TOURISM_STATS = [
@@ -61,35 +61,48 @@ const INITIAL_USERS = [
 const INITIAL_POSTS = [
   { 
     id: 1, 
-    title: '🏝️ สุดยอดทริปภูเก็ต 3 วัน 2 คืน (ดำน้ำ + พักหรู)', 
+    title: '🏝️ ทริปภูเก็ต 3 วัน 2 คืน (ดำน้ำ + พักหรู)', 
     location: 'ภูเก็ต', 
-    gps: '7.763615, 98.371266',
-    date: '2026-04-12', 
-    maxPeople: 20,
-    desc: 'สัมผัสประสบการณ์สุดพิเศษกับทริปภูเก็ตแบบจัดเต็ม! \nวันที่ 1: เดินชมเมืองเก่าภูเก็ต ชิมอาหารพื้นเมือง \nวันที่ 2: ล่องเรือ Speedboat ดำน้ำดูปะการังที่เกาะพีพีและอ่าวมาหยา \nวันที่ 3: พักผ่อนสุดหรูที่ศรีพันวา และชมพระอาทิตย์ตกที่แหลมพรหมเทพ \nราคานี้รวมที่พัก อาหาร และรถรับส่งตลอดการเดินทาง',
+    gps: '7.8804, 98.3923',
+    date: '2026-04-15', 
+    maxPeople: 15,
+    desc: 'แพ็คเกจสุดคุ้ม! เที่ยวภูเก็ตแบบจัดเต็ม 3 วัน 2 คืน \n- ที่พัก: The SIS KATA (2 คืน พร้อมอาหารเช้า) \n- เดินทาง: รถเช่าขับเอง 48 ชม. + Speed Boat ทัวร์เกาะพีพี-เกาะไข่ \n- ไฮไลท์: ดำน้ำอ่าวมาหยา, เล่นน้องแมวเกาะไข่, เช็คอินคาเฟ่ Bookhemian 2521 \n- ราคาเพียง 4,599 บาท/ท่าน (รวมทุกอย่างแล้ว!)',
     author: 'ไกด์สมศรี', 
     type: 'trip', 
-    media: 'https://images.unsplash.com/photo-1589394815804-989b3b785d51?w=800&auto=format&fit=crop&q=60', 
+    media: 'https://www.chillpainai.com/src/wewakeup/scoop/images/eb1a9862e7917fa926385a434856060ab0455aae.jpg?w=800', // รูปภูเก็ตสวยๆ
     chat: [], 
-    likes: 342, 
-    price: 4990, 
+    likes: 890, 
+    price: 4599, 
     participants: [] 
   },
   { 
     id: 2, 
     title: 'หาเพื่อนเดินตลาดน้ำอัมพวา เสาร์นี้! 🚣', 
     location: 'สมุทรสงคราม', 
-    gps: '13.4258, 99.9554',
+    gps: '13.4258, 99.9554', 
     date: '2026-02-20',
     maxPeople: 5,
     desc: 'เน้นหาของกิน ถ่ายรูปชิลๆ หารค่าน้ำมันกันครับ ออกเดินทางจากอนุสาวรีย์ฯ 9 โมงเช้า',
-    author: 'นักเดินทาง Alex', 
+    author: 'Alex Explorer', 
     type: 'trip', 
-    media: 'https://images.unsplash.com/photo-1598970434795-0c54fe7c0648?w=600', 
+    media: 'https://s359.kapook.com/pagebuilder/496fc659-2906-4f0a-8d34-45b158f08045.jpg?w=600', 
     chat: [{sender: 'ไกด์สมศรี', text: 'ไปกี่โมงคะ สนใจๆ', time: '10:00'}], 
     likes: 12, 
     price: 0, 
-    participants: ['นักเดินทาง Alex'] 
+    participants: ['Alex Explorer'] 
+  },
+  { 
+    id: 3, 
+    title: 'Vlog: เชียงใหม่หน้าฝน 🌧️', 
+    location: 'เชียงใหม่', 
+    author: 'Alex Explorer', 
+    type: 'video', 
+    media: 'https://www.youtube.com/watch?v=xu8K6txbGNE', 
+    desc: 'พาไปดูนาขั้นบันไดที่ป่าบงเปียง สวยมากกก',
+    chat: [], 
+    likes: 88, 
+    price: 0, 
+    participants: [] 
   }
 ];
 
@@ -123,13 +136,18 @@ const calculateCountdown = (date) => {
 // --- FILE UPLOADER (LOCAL FILE PREVIEW - INSTANT) ---
 const FileUploader = ({ label, onUpload, value, type = 'image' }) => {
   const fileInputRef = useRef(null);
-  
+  const [loading, setLoading] = useState(false);
+
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Create local blob URL immediately (No fake delay needed for demo feeling, but keeps it snappy)
-      const objectUrl = URL.createObjectURL(file);
-      onUpload(objectUrl);
+      setLoading(true);
+      // Simulate processing time then create local URL
+      setTimeout(() => {
+        const objectUrl = URL.createObjectURL(file);
+        onUpload(objectUrl);
+        setLoading(false);
+      }, 500);
     }
   };
 
@@ -148,7 +166,12 @@ const FileUploader = ({ label, onUpload, value, type = 'image' }) => {
           accept={type === 'video' ? "video/*" : "image/*"} 
         />
         
-        {value ? (
+        {loading ? (
+          <div className="flex flex-col items-center text-blue-600">
+            <Loader className="w-8 h-8 animate-spin mb-2"/>
+            <span className="text-xs">กำลังประมวลผล...</span>
+          </div>
+        ) : value ? (
           <div className="relative w-full h-48 bg-gray-100 rounded-lg overflow-hidden group/preview shadow-sm">
             {type === 'video' ? (
                <div className="w-full h-full flex flex-col items-center justify-center bg-black text-white">
@@ -221,6 +244,7 @@ const TripDetailModal = ({ post, user, onClose, onJoin, onChat, usersDb }) => {
           </div>
         </div>
         <div className="p-6 overflow-y-auto flex-1 space-y-6">
+          
           <div className="flex justify-between items-center bg-indigo-50 p-4 rounded-xl border border-indigo-100">
             <div>
                <div className="text-xs font-bold text-indigo-600 uppercase tracking-wider">วันเดินทาง</div>
@@ -231,14 +255,32 @@ const TripDetailModal = ({ post, user, onClose, onJoin, onChat, usersDb }) => {
                <div className="text-2xl font-bold text-blue-600">{post.price > 0 ? `฿${post.price.toLocaleString()}` : 'ฟรี'}</div>
             </div>
           </div>
-          <div><h3 className="font-bold text-gray-800 mb-2 flex items-center gap-2"><Info className="w-4 h-4"/> รายละเอียดทริป</h3><p className="text-gray-600 text-sm bg-gray-50 p-4 rounded-xl leading-relaxed whitespace-pre-line border border-gray-100">{post.desc}</p></div>
+
+          <div>
+             <h3 className="font-bold text-gray-800 mb-2 flex items-center gap-2"><Info className="w-4 h-4"/> รายละเอียดทริป</h3>
+             <p className="text-gray-600 text-sm bg-gray-50 p-4 rounded-xl leading-relaxed whitespace-pre-line border border-gray-100">{post.desc}</p>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div className="border p-3 rounded-xl hover:bg-gray-50 transition-colors"><div className="text-xs text-gray-400 mb-1">สถานที่หลัก</div><div className="text-sm font-bold flex items-center gap-1"><MapPin className="w-4 h-4 text-red-500"/>{post.location}</div></div>
             <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer" className="border p-3 rounded-xl hover:bg-blue-50 transition-colors cursor-pointer group"><div className="text-xs text-gray-400 mb-1">พิกัด GPS (กดเพื่อนำทาง)</div><div className="text-sm font-bold flex items-center gap-1 text-blue-600 group-hover:underline"><Navigation className="w-4 h-4"/> {post.gps || '-'} <ExternalLink className="w-3 h-3 ml-1"/></div></a>
           </div>
-          <div><div className="flex justify-between text-sm font-bold mb-2 text-gray-700"><span>เพื่อนร่วมทริป ({post.participants?.length || 0}/{post.maxPeople})</span></div><div className="flex -space-x-2 overflow-hidden py-1">{participantAvatars.length > 0 ? participantAvatars.map((img, i) => (<img key={i} className="h-8 w-8 rounded-full border-2 border-white object-cover" src={img} />)) : <span className="text-sm text-gray-400">ยังไม่มีผู้เข้าร่วม</span>}</div></div>
+
+          <div>
+             <div className="flex justify-between text-sm font-bold mb-2 text-gray-700"><span>เพื่อนร่วมทริป ({post.participants?.length || 0}/{post.maxPeople})</span></div>
+             <div className="flex -space-x-2 overflow-hidden py-1">
+                {participantAvatars.length > 0 ? participantAvatars.map((img, i) => (<img key={i} className="h-8 w-8 rounded-full border-2 border-white object-cover" src={img} />)) : <span className="text-sm text-gray-400">ยังไม่มีผู้เข้าร่วม</span>}
+             </div>
+          </div>
         </div>
-        <div className="p-4 border-t bg-gray-50 flex gap-3"><button onClick={onChat} className="flex-1 py-3 bg-white border border-gray-300 rounded-xl font-bold text-gray-700 hover:bg-gray-100 flex items-center justify-center gap-2 transition-colors"><MessageSquare className="w-4 h-4"/> พูดคุย</button>{!isJoined ? <button onClick={onJoin} className="flex-[2] py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all transform active:scale-95">{post.price > 0 ? 'จองทริปทันที' : 'ขอเข้าร่วมฟรี'}</button> : <button className="flex-[2] py-3 bg-green-500 text-white rounded-xl font-bold cursor-default flex items-center justify-center gap-2"><CheckCircle className="w-5 h-5"/> เข้าร่วมแล้ว</button>}</div>
+
+        <div className="p-4 border-t bg-gray-50 flex gap-3">
+          <button onClick={onChat} className="flex-1 py-3 bg-white border border-gray-300 rounded-xl font-bold text-gray-700 hover:bg-gray-100 flex items-center justify-center gap-2 transition-colors"><MessageSquare className="w-4 h-4"/> พูดคุย</button>
+          {!isJoined ? 
+            <button onClick={onJoin} className="flex-[2] py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all transform active:scale-95">{post.price > 0 ? 'จองทริปทันที' : 'ขอเข้าร่วมฟรี'}</button> 
+            : <button className="flex-[2] py-3 bg-green-500 text-white rounded-xl font-bold cursor-default flex items-center justify-center gap-2"><CheckCircle className="w-5 h-5"/> เข้าร่วมแล้ว</button>
+          }
+        </div>
       </div>
     </div>
   );
@@ -300,7 +342,7 @@ const ChatRoom = ({ trip, currentUser, onBack, onSendMessage }) => {
 };
 
 const MyActivity = ({ user, posts, transactions }) => {
-  const myTrips = posts.filter(p => p.author === user.name || (p.participants && p.participants.includes(user.name)));
+  const myTrips = posts.filter(p => p.author === user.name || p.participants.includes(user.name));
   const myTrans = transactions.filter(t => t.from === user.name);
   return (
     <div className="space-y-6 animate-in fade-in">
@@ -405,6 +447,7 @@ const ProfileModal = ({ user, onClose, onSave }) => {
   const [tab, setTab] = useState('info');
   const [formData, setFormData] = useState({ ...user });
   const [verifyText, setVerifyText] = useState(user.verifyRequest || '');
+  const handleVerifySubmit = () => { if(!verifyText.trim()) return alert("กรอกข้อมูลให้ครบ"); onSave({ ...formData, verifyRequest: verifyText, status: 'pending' }); alert("ส่งตรวจสอบแล้ว"); };
   return (
     <div className="space-y-4">
       <div className="flex gap-2 p-1 bg-gray-100 rounded-lg mb-4"><button onClick={() => setTab('info')} className={`flex-1 py-2 text-sm font-bold rounded-md transition-all ${tab === 'info' ? 'bg-white shadow text-blue-600' : 'text-gray-500'}`}>ข้อมูลส่วนตัว</button><button onClick={() => setTab('verify')} className={`flex-1 py-2 text-sm font-bold rounded-md transition-all ${tab === 'verify' ? 'bg-white shadow text-green-600' : 'text-gray-500'}`}>ยืนยันตัวตน</button></div>
@@ -413,7 +456,7 @@ const ProfileModal = ({ user, onClose, onSave }) => {
         <FileUploader label="เปลี่ยนรูปโปรไฟล์" type="image" onUpload={(url) => setFormData({...formData, image: url})} />
         <div><label className="text-xs font-bold text-gray-500">ข้อมูลติดต่อ</label><input className="w-full border p-2 rounded-lg" value={formData.contact || ''} onChange={e => setFormData({...formData, contact: e.target.value})} placeholder="Line / Tel" /></div></div><Button onClick={() => onSave(formData)} className="w-full mt-2">บันทึกการเปลี่ยนแปลง</Button></div>
       ) : (
-        <div className="text-center space-y-4 py-4">{formData.status === 'verified' ? <div className="text-green-600 py-6 animate-in zoom-in"><ShieldCheck className="w-20 h-20 mx-auto mb-4"/><h3 className="font-bold text-xl">ยืนยันตัวตนแล้ว</h3><p className="text-sm opacity-80">บัญชีของคุณปลอดภัยและน่าเชื่อถือ</p></div> : formData.status === 'pending' ? <div className="text-yellow-600 py-6 animate-in zoom-in"><Loader className="w-20 h-20 mx-auto mb-4 animate-spin"/><h3 className="font-bold text-xl">รอการตรวจสอบ</h3><p className="text-sm opacity-80">แอดมินกำลังตรวจสอบข้อมูลของคุณ</p></div> : <><div className="bg-blue-50 p-4 rounded-xl text-left text-sm text-gray-600 mb-4">การยืนยันตัวตนช่วยเพิ่มความน่าเชื่อถือให้กับบัญชีของคุณ โปรดกรอกรายละเอียดเกี่ยวกับตัวคุณหรือธุรกิจของคุณ</div><textarea className="w-full border p-3 rounded-lg h-32 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="พิมพ์รายละเอียดเพื่อยืนยันตัวตน..." value={verifyText} onChange={e => setVerifyText(e.target.value)} /><Button onClick={() => { onSave({ ...formData, verifyRequest: verifyText, status: 'pending' }); alert('ส่งคำขอแล้ว'); }} variant="success" className="w-full">ส่งตรวจสอบ</Button></>}</div>
+        <div className="text-center space-y-4 py-4">{formData.status === 'verified' ? <div className="text-green-600 py-6 animate-in zoom-in"><ShieldCheck className="w-20 h-20 mx-auto mb-4"/><h3 className="font-bold text-xl">ยืนยันตัวตนแล้ว</h3><p className="text-sm opacity-80">บัญชีของคุณปลอดภัยและน่าเชื่อถือ</p></div> : formData.status === 'pending' ? <div className="text-yellow-600 py-6 animate-in zoom-in"><Loader className="w-20 h-20 mx-auto mb-4 animate-spin"/><h3 className="font-bold text-xl">รอการตรวจสอบ</h3><p className="text-sm opacity-80">แอดมินกำลังตรวจสอบข้อมูลของคุณ</p></div> : <><div className="bg-blue-50 p-4 rounded-xl text-left text-sm text-gray-600 mb-4">การยืนยันตัวตนช่วยเพิ่มความน่าเชื่อถือให้กับบัญชีของคุณ โปรดกรอกรายละเอียดเกี่ยวกับตัวคุณหรือธุรกิจของคุณ</div><textarea className="w-full border p-3 rounded-lg h-32 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="พิมพ์รายละเอียดเพื่อยืนยันตัวตน..." value={verifyText} onChange={e => setVerifyText(e.target.value)} /><Button onClick={handleVerifySubmit} variant="success" className="w-full">ส่งตรวจสอบ</Button></>}</div>
       )}
     </div>
   );
@@ -424,10 +467,10 @@ const ThailandDiscovery = () => {
   const [selectedProv, setSelectedProv] = useState(null);
   return (
     <div className="space-y-6 animate-in slide-in-from-bottom duration-300">
-      <div className="bg-gradient-to-r from-teal-500 to-emerald-600 rounded-2xl p-8 text-white text-center shadow-lg relative overflow-hidden"><div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-16 -mt-16"></div><h2 className="text-3xl font-bold mb-2 flex items-center justify-center gap-2 relative z-10"><Map className="w-8 h-8"/> 77 จังหวัดทั่วไทย</h2><p className="text-teal-100 relative z-10">ค้นหาข้อมูลท่องเที่ยว จุดเช็คอิน และของดีประจำจังหวัด</p></div>
-      <div className="flex flex-wrap gap-2 justify-center sticky top-20 z-30 bg-[#F8F9FA] py-2">{Object.keys(THAILAND_DATA).map(key => (<button key={key} onClick={() => setActiveRegion(key)} className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${activeRegion === key ? 'bg-teal-600 text-white shadow-md transform scale-105' : 'bg-white text-gray-600 border hover:bg-gray-50'}`}>{THAILAND_DATA[key].name}</button>))}</div>
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">{THAILAND_DATA[activeRegion].provinces.map((prov, idx) => (<div key={idx} onClick={() => setSelectedProv(prov)} className={`cursor-pointer rounded-xl p-4 border bg-white hover:shadow-lg transition-all hover:-translate-y-1 group`}><div className="font-bold text-gray-800 group-hover:text-teal-600 transition-colors">{prov.name}</div><div className="text-xs text-gray-500 mt-2 flex items-center gap-1"><Star className="w-3 h-3 text-yellow-400 fill-yellow-400"/> {prov.highlight}</div></div>))}</div>
-      {selectedProv && <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setSelectedProv(null)}><div className="bg-white rounded-2xl w-full max-w-sm p-6 relative animate-in zoom-in shadow-2xl" onClick={e => e.stopPropagation()}><button onClick={() => setSelectedProv(null)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><XCircle/></button><div className="text-center"><div className="w-20 h-20 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl font-bold text-teal-600 border-4 border-white shadow">{selectedProv.name[0]}</div><h3 className="text-2xl font-bold mb-2 text-gray-800">{selectedProv.name}</h3><div className="inline-block bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-bold mb-6">⭐ {selectedProv.highlight}</div><p className="text-gray-600 mb-8 bg-gray-50 p-4 rounded-xl text-sm">{selectedProv.desc}</p><Button className="w-full shadow-lg shadow-blue-200" onClick={() => window.open(`https://www.google.com/search?q=ที่เที่ยว${selectedProv.name}`, '_blank')}>ค้นหาข้อมูลเพิ่มเติมบน Google</Button></div></div></div>}
+      <div className="bg-gradient-to-r from-teal-500 to-emerald-600 rounded-2xl p-8 text-white text-center shadow-lg"><h2 className="text-3xl font-bold mb-2 flex items-center justify-center gap-2"><Map className="w-8 h-8"/> 77 จังหวัดทั่วไทย</h2></div>
+      <div className="flex flex-wrap gap-2 justify-center">{Object.keys(THAILAND_DATA).map(key => (<button key={key} onClick={() => setActiveRegion(key)} className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${activeRegion === key ? 'bg-blue-600 text-white shadow-md' : 'bg-white text-gray-600 border'}`}>{THAILAND_DATA[key].name}</button>))}</div>
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">{THAILAND_DATA[activeRegion].provinces.map((prov, idx) => (<div key={idx} onClick={() => setSelectedProv(prov)} className={`cursor-pointer rounded-xl p-4 border bg-white hover:shadow-lg transition-all`}><div className="font-bold">{prov.name}</div><div className="text-xs opacity-70"><Star className="w-3 h-3 inline"/> {prov.highlight}</div></div>))}</div>
+      {selectedProv && <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setSelectedProv(null)}><div className="bg-white rounded-2xl w-full max-w-sm p-6 relative animate-in zoom-in" onClick={e => e.stopPropagation()}><button onClick={() => setSelectedProv(null)} className="absolute top-4 right-4 text-gray-400"><XCircle/></button><div className="text-center"><div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold text-blue-600">{selectedProv.name[0]}</div><h3 className="text-2xl font-bold mb-2">{selectedProv.name}</h3><div className="inline-block bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-bold mb-4">⭐ {selectedProv.highlight}</div><p className="text-gray-600">{selectedProv.desc}</p><Button className="w-full mt-6" onClick={() => window.open(`https://www.google.com/search?q=ที่เที่ยว${selectedProv.name}`, '_blank')}>ค้นหาข้อมูล</Button></div></div></div>}
     </div>
   );
 };
