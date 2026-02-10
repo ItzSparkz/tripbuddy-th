@@ -6,10 +6,14 @@ import {
   Heart, Share2, XCircle, CheckCircle, UploadCloud, ShieldCheck, Smartphone,
   Star, Loader, DollarSign, FileText, Trash2, CreditCard, Search,
   BarChart2, Users, AlertCircle, Database, CalendarCheck, Clock, Ticket, Plane,
-  Navigation, Calendar, Info, Building, Bus, Briefcase, Tag
+  Navigation, Calendar, Info, Building, Bus, Briefcase, Tag, FileImage
 } from 'lucide-react';
 
-// --- 1. LOGO ---
+// ==========================================
+// 1. ASSETS & HELPERS
+// ==========================================
+
+// Logo Component
 const Logo = ({ className }) => (
   <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
     <defs><linearGradient id="tripGradient" x1="0" y1="0" x2="200" y2="200" gradientUnits="userSpaceOnUse"><stop stopColor="#2563EB" /><stop offset="1" stopColor="#06B6D4" /></linearGradient></defs>
@@ -19,17 +23,165 @@ const Logo = ({ className }) => (
   </svg>
 );
 
-// --- 2. DATASETS (FULL) ---
-const THAILAND_DATA = {
-  north: { name: 'ภาคเหนือ', color: 'bg-green-100 text-green-800', provinces: [{ name: 'เชียงใหม่', desc: 'ดอยอินทนนท์ ถนนคนเดิน', highlight: 'ดอยอินทนนท์' }, { name: 'เชียงราย', desc: 'วัดร่องขุ่น ดอยตุง', highlight: 'วัดร่องขุ่น' }, { name: 'น่าน', desc: 'กระซิบรัก ดอยเสมอดาว', highlight: 'ดอยเสมอดาว' }, { name: 'แม่ฮ่องสอน', desc: 'ปางอุ๋ง', highlight: 'ปางอุ๋ง' }, { name: 'แพร่', desc: 'แพะเมืองผี', highlight: 'แพะเมืองผี' }, { name: 'พะเยา', desc: 'กว๊านพะเยา', highlight: 'กว๊านพะเยา' }, { name: 'ลำปาง', desc: 'เมืองรถม้า', highlight: 'วัดพระธาตุลำปางหลวง' }, { name: 'ลำพูน', desc: 'พระธาตุหริภุญชัย', highlight: 'พระธาตุหริภุญชัย' }, { name: 'อุตรดิตถ์', desc: 'ภูสอยดาว', highlight: 'ภูสอยดาว' }] },
-  northeast: { name: 'ภาคอีสาน', color: 'bg-orange-100 text-orange-800', provinces: [{ name: 'นครราชสีมา', desc: 'เขาใหญ่', highlight: 'เขาใหญ่' }, { name: 'ขอนแก่น', desc: 'ไดโนเสาร์', highlight: 'เขื่อนอุบลรัตน์' }, { name: 'อุดรธานี', desc: 'คำชะโนด', highlight: 'คำชะโนด' }, { name: 'อุบลราชธานี', desc: 'สามพันโบก', highlight: 'สามพันโบก' }, { name: 'หนองคาย', desc: 'พญานาค', highlight: 'วัดผาตากเสื้อ' }, { name: 'เลย', desc: 'เชียงคาน', highlight: 'เชียงคาน' }, { name: 'บุรีรัมย์', desc: 'พนมรุ้ง', highlight: 'สนามช้าง' }, { name: 'สุรินทร์', desc: 'ช้าง', highlight: 'หมู่บ้านช้าง' }, { name: 'ศรีสะเกษ', desc: 'ผามออีแดง', highlight: 'ผามออีแดง' }, { name: 'สกลนคร', desc: 'หนองหาร', highlight: 'วัดพระธาตุเชิงชุม' }] },
-  central: { name: 'ภาคกลาง', color: 'bg-yellow-100 text-yellow-800', provinces: [{ name: 'กรุงเทพฯ', desc: 'วัดพระแก้ว', highlight: 'วัดอรุณฯ' }, { name: 'อยุธยา', desc: 'เมืองเก่า', highlight: 'วัดมหาธาตุ' }, { name: 'สระบุรี', desc: 'น้ำตก', highlight: 'น้ำตกเจ็ดสาวน้อย' }, { name: 'ลพบุรี', desc: 'ลิง', highlight: 'พระปรางค์สามยอด' }, { name: 'สิงห์บุรี', desc: 'บางระจัน', highlight: 'วัดพิกุลทอง' }, { name: 'ชัยนาท', desc: 'สวนนก', highlight: 'เขื่อนเจ้าพระยา' }, { name: 'อ่างทอง', desc: 'ตุ๊กตาชาววัง', highlight: 'วัดม่วง' }, { name: 'นครสวรรค์', desc: 'ปากน้ำโพ', highlight: 'บึงบอระเพ็ด' }, { name: 'สมุทรสงคราม', desc: 'อัมพวา', highlight: 'ตลาดร่มหุบ' }, { name: 'นครนายก', desc: 'เขื่อน', highlight: 'เขื่อนขุนด่านฯ' }] },
-  east: { name: 'ภาคตะวันออก', color: 'bg-blue-100 text-blue-800', provinces: [{ name: 'ชลบุรี', desc: 'พัทยา', highlight: 'เกาะล้าน' }, { name: 'ระยอง', desc: 'เสม็ด', highlight: 'สวนผลไม้' }, { name: 'จันทบุรี', desc: 'เนินนางพญา', highlight: 'จุดชมวิวเนินนางพญา' }, { name: 'ตราด', desc: 'เกาะช้าง', highlight: 'เกาะกูด' }] },
-  west: { name: 'ภาคตะวันตก', color: 'bg-amber-100 text-amber-800', provinces: [{ name: 'กาญจนบุรี', desc: 'สะพานมอญ', highlight: 'สังขละบุรี' }, { name: 'ตาก', desc: 'ทีลอซู', highlight: 'น้ำตกทีลอซู' }, { name: 'ประจวบฯ', desc: 'หัวหิน', highlight: 'อ่าวมะนาว' }, { name: 'เพชรบุรี', desc: 'ชะอำ', highlight: 'หาดชะอำ' }, { name: 'ราชบุรี', desc: 'สวนผึ้ง', highlight: 'สวนผึ้ง' }] },
-  south: { name: 'ภาคใต้', color: 'bg-cyan-100 text-cyan-800', provinces: [{ name: 'ภูเก็ต', desc: 'แหลมพรหมเทพ', highlight: 'ป่าตอง' }, { name: 'สุราษฎร์ฯ', desc: 'สมุย', highlight: 'เขื่อนเชี่ยวหลาน' }, { name: 'นครศรีฯ', desc: 'ไอ้ไข่', highlight: 'วัดเจดีย์' }, { name: 'สงขลา', desc: 'หาดใหญ่', highlight: 'นางเงือก' }, { name: 'กระบี่', desc: 'พีพี', highlight: 'สระมรกต' }, { name: 'พังงา', desc: 'เสม็ดนางชี', highlight: 'สิมิลัน' }, { name: 'ตรัง', desc: 'หมูย่าง', highlight: 'ถ้ำมรกต' }, { name: 'สตูล', desc: 'หลีเป๊ะ', highlight: 'เกาะหลีเป๊ะ' }, { name: 'ชุมพร', desc: 'หาดทรายรี', highlight: 'หาดทรายรี' }, { name: 'ระนอง', desc: 'บ่อน้ำร้อน', highlight: 'ภูเขาหญ้า' }] }
+// UI Components
+const Button = ({ children, onClick, variant = 'primary', className = '', disabled = false }) => {
+  const variants = { primary: "bg-blue-600 text-white hover:bg-blue-700 shadow-md", secondary: "bg-white text-gray-700 border hover:bg-gray-50", success: "bg-green-600 text-white hover:bg-green-700 shadow-md", danger: "bg-red-50 text-red-600 hover:bg-red-100", outline: "border border-blue-600 text-blue-600 hover:bg-blue-50" };
+  return <button onClick={onClick} disabled={disabled} className={`px-4 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${variants[variant]} ${className}`}>{children}</button>;
 };
-const TOURISM_STATS = [{ province: 'กรุงเทพฯ', visitors: '22.5M', score: 98, color: 'bg-blue-500' }, { province: 'ภูเก็ต', visitors: '14.2M', score: 85, color: 'bg-teal-500' }, { province: 'ชลบุรี', visitors: '12.8M', score: 78, color: 'bg-indigo-500' }];
-const DREAM_DESTINATIONS = [{ id: 1, name: 'คัปปาโดเกีย', location: 'ตุรกี', image: 'https://images.unsplash.com/photo-1641128324972-af3212f0f6bd?w=400', desc: 'ดินแดนบอลลูน' }, { id: 2, name: 'ซานโตรินี', location: 'กรีซ', image: 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=400', desc: 'เกาะขาวฟ้า' }];
+
+const Card = ({ children, className = '', onClick }) => <div onClick={onClick} className={`bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer ${className}`}>{children}</div>;
+
+const Badge = ({ status }) => {
+  const styles = { verified: 'bg-green-100 text-green-700', pending: 'bg-yellow-100 text-yellow-700', active: 'bg-blue-100 text-blue-700', approved: 'bg-green-100 text-green-700', rejected: 'bg-red-100 text-red-700' };
+  return <span className={`px-2 py-0.5 rounded-full text-xs font-bold uppercase ${styles[status] || 'bg-gray-100'}`}>{status === 'approved' ? 'อนุมัติแล้ว' : status === 'pending' ? 'รอตรวจสอบ' : status === 'verified' ? 'ยืนยันแล้ว' : status}</span>;
+};
+
+const calculateCountdown = (date) => {
+  if (!date) return null;
+  const diff = new Date(date) - new Date();
+  if (diff < 0) return "ออกเดินทางแล้ว";
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  return `อีก ${days} วัน`;
+};
+
+// File Uploader
+const FileUploader = ({ label, onUpload, value, type = 'image' }) => {
+  const [uploading, setUploading] = useState(false);
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setUploading(true);
+      setTimeout(() => {
+        setUploading(false);
+        const mockUrl = type === 'video' ? 'https://www.youtube.com/embed/dQw4w9WgXcQ' : 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=800'; 
+        onUpload(mockUrl);
+        alert('อัปโหลดสำเร็จ!');
+      }, 1500);
+    }
+  };
+  return (
+    <div className="mb-3"><label className="block text-sm font-medium text-gray-700 mb-1">{label}</label><div className="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center hover:bg-gray-50 transition-colors relative"><input type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFileChange} accept={type === 'video' ? "video/*" : "image/*"} />{uploading ? <div className="flex flex-col items-center text-blue-600"><Loader className="w-8 h-8 animate-spin mb-2"/><span className="text-xs">กำลังอัปโหลด...</span></div> : value ? <div className="flex items-center gap-3 bg-green-50 p-2 rounded-lg border border-green-200"><div className="text-xs text-green-800 font-bold">อัปโหลดสำเร็จ</div></div> : <div className="flex flex-col items-center text-gray-400"><UploadCloud className="w-8 h-8 mb-2"/><span className="text-sm">คลิกเพื่อเลือกไฟล์{type === 'video' ? 'วิดีโอ' : 'รูปภาพ'}</span></div>}</div></div>
+  );
+};
+
+// --- 2. DATA CONSTANTS (FULL 77 PROVINCES) ---
+const THAILAND_DATA = {
+  north: {
+    name: 'ภาคเหนือ (9)',
+    color: 'bg-green-100 text-green-800',
+    provinces: [
+      { name: 'เชียงใหม่', desc: 'ดอยอินทนนท์ ถนนคนเดิน', highlight: 'ดอยอินทนนท์' },
+      { name: 'เชียงราย', desc: 'วัดร่องขุ่น ดอยตุง', highlight: 'วัดร่องขุ่น' },
+      { name: 'น่าน', desc: 'กระซิบรัก ดอยเสมอดาว', highlight: 'ดอยเสมอดาว' },
+      { name: 'แม่ฮ่องสอน', desc: 'ปางอุ๋ง ทุ่งดอกบัวตอง', highlight: 'ปางอุ๋ง' },
+      { name: 'แพร่', desc: 'พระธาตุช่อแฮ แพะเมืองผี', highlight: 'แพะเมืองผี' },
+      { name: 'พะเยา', desc: 'กว๊านพะเยา', highlight: 'กว๊านพะเยา' },
+      { name: 'ลำปาง', desc: 'เมืองรถม้า', highlight: 'วัดพระธาตุลำปางหลวง' },
+      { name: 'ลำพูน', desc: 'พระธาตุหริภุญชัย', highlight: 'พระธาตุหริภุญชัย' },
+      { name: 'อุตรดิตถ์', desc: 'เมืองลับแล', highlight: 'ภูสอยดาว' }
+    ]
+  },
+  northeast: {
+    name: 'ภาคอีสาน (20)',
+    color: 'bg-orange-100 text-orange-800',
+    provinces: [
+      { name: 'นครราชสีมา', desc: 'เขาใหญ่ วังน้ำเขียว', highlight: 'อุทยานแห่งชาติเขาใหญ่' },
+      { name: 'ขอนแก่น', desc: 'เมืองไดโนเสาร์', highlight: 'เขื่อนอุบลรัตน์' },
+      { name: 'อุดรธานี', desc: 'คำชะโนด ทะเลบัวแดง', highlight: 'คำชะโนด' },
+      { name: 'อุบลราชธานี', desc: 'สามพันโบก ผาแต้ม', highlight: 'สามพันโบก' },
+      { name: 'หนองคาย', desc: 'บั้งไฟพญานาค', highlight: 'วัดผาตากเสื้อ' },
+      { name: 'เลย', desc: 'เชียงคาน ภูกระดึง', highlight: 'เชียงคาน' },
+      { name: 'บุรีรัมย์', desc: 'ปราสาทพนมรุ้ง', highlight: 'สนามช้างอารีน่า' },
+      { name: 'สุรินทร์', desc: 'ถิ่นช้างใหญ่', highlight: 'หมู่บ้านช้าง' },
+      { name: 'ศรีสะเกษ', desc: 'ผามออีแดง', highlight: 'ผามออีแดง' },
+      { name: 'สกลนคร', desc: 'เมืองหนองหาร', highlight: 'วัดพระธาตุเชิงชุม' },
+      { name: 'นครพนม', desc: 'พระธาตุพนม', highlight: 'พญาศรีสัตตนาคราช' },
+      { name: 'มุกดาหาร', desc: 'ตลาดอินโดจีน', highlight: 'หอแก้วมุกดาหาร' },
+      { name: 'ยโสธร', desc: 'เมืองบั้งไฟ', highlight: 'พญาคันคาก' },
+      { name: 'ร้อยเอ็ด', desc: 'บึงพลาญชัย', highlight: 'เจดีย์มหามงคลบัว' },
+      { name: 'กาฬสินธุ์', desc: 'ไดโนเสาร์ภูกุ้มข้าว', highlight: 'พิพิธภัณฑ์สิรินธร' },
+      { name: 'มหาสารคาม', desc: 'สะดืออีสาน', highlight: 'พระธาตุนาดูน' },
+      { name: 'ชัยภูมิ', desc: 'ทุ่งดอกกระเจียว', highlight: 'มอหินขาว' },
+      { name: 'อำนาจเจริญ', desc: 'พระมงคลมิ่งเมือง', highlight: 'พุทธอุทยาน' },
+      { name: 'หนองบัวลำภู', desc: 'ถ้ำเอราวัณ', highlight: 'วัดถ้ำกลองเพล' },
+      { name: 'บึงกาฬ', desc: 'ภูทอก หินสามวาฬ', highlight: 'ถ้ำนาคา' }
+    ]
+  },
+  central: {
+    name: 'ภาคกลาง (22)',
+    color: 'bg-yellow-100 text-yellow-800',
+    provinces: [
+      { name: 'กรุงเทพมหานคร', desc: 'เมืองหลวง วัดพระแก้ว', highlight: 'วัดอรุณฯ' },
+      { name: 'พระนครศรีอยุธยา', desc: 'เมืองเก่ามรดกโลก', highlight: 'วัดมหาธาตุ' },
+      { name: 'สระบุรี', desc: 'รอยพระพุทธบาท', highlight: 'น้ำตกเจ็ดสาวน้อย' },
+      { name: 'ลพบุรี', desc: 'เมืองลิง', highlight: 'พระปรางค์สามยอด' },
+      { name: 'สิงห์บุรี', desc: 'วีรชนบางระจัน', highlight: 'วัดพิกุลทอง' },
+      { name: 'ชัยนาท', desc: 'สวนนกชัยนาท', highlight: 'เขื่อนเจ้าพระยา' },
+      { name: 'อ่างทอง', desc: 'ตุ๊กตาชาววัง', highlight: 'วัดม่วง' },
+      { name: 'นครสวรรค์', desc: 'ปากน้ำโพ', highlight: 'บึงบอระเพ็ด' },
+      { name: 'อุทัยธานี', desc: 'เมืองพระชนกจักรี', highlight: 'วัดท่าซุง' },
+      { name: 'กำแพงเพชร', desc: 'กล้วยไข่เมืองกำแพง', highlight: 'น้ำตกคลองลาน' },
+      { name: 'สุโขทัย', desc: 'เมืองเก่าสุโขทัย', highlight: 'อุทยานประวัติศาสตร์' },
+      { name: 'พิษณุโลก', desc: 'พระพุทธชินราช', highlight: 'วัดพระศรีรัตนมหาธาตุ' },
+      { name: 'พิจิตร', desc: 'เมืองชาละวัน', highlight: 'บึงสีไฟ' },
+      { name: 'เพชรบูรณ์', desc: 'เขาค้อ ภูทับเบิก', highlight: 'เขาค้อ' },
+      { name: 'สุพรรณบุรี', desc: 'มังกรสวรรค์', highlight: 'บึงฉวาก' },
+      { name: 'นครปฐม', desc: 'พระปฐมเจดีย์', highlight: 'องค์พระปฐมเจดีย์' },
+      { name: 'สมุทรสาคร', desc: 'มหาชัย', highlight: 'ตลาดทะเลไทย' },
+      { name: 'สมุทรสงคราม', desc: 'อัมพวา', highlight: 'ตลาดร่มหุบ' },
+      { name: 'นนทบุรี', desc: 'ทุเรียนนนท์', highlight: 'เกาะเกร็ด' },
+      { name: 'ปทุมธานี', desc: 'เมืองบัว', highlight: 'วัดเจดีย์หอย' },
+      { name: 'สมุทรปราการ', desc: 'เมืองปากน้ำ', highlight: 'บางกระเจ้า' },
+      { name: 'นครนายก', desc: 'เมืองในฝันใกล้กรุง', highlight: 'เขื่อนขุนด่านฯ' }
+    ]
+  },
+  east: {
+    name: 'ภาคตะวันออก (7)',
+    color: 'bg-blue-100 text-blue-800',
+    provinces: [
+      { name: 'ชลบุรี', desc: 'พัทยา บางแสน', highlight: 'เกาะล้าน' },
+      { name: 'ระยอง', desc: 'เกาะเสม็ด', highlight: 'สวนผลไม้' },
+      { name: 'จันทบุรี', desc: 'เมืองผลไม้', highlight: 'เนินนางพญา' },
+      { name: 'ตราด', desc: 'เกาะช้าง', highlight: 'เกาะกูด' },
+      { name: 'ฉะเชิงเทรา', desc: 'หลวงพ่อโสธร', highlight: 'วัดโสธรวราราม' },
+      { name: 'ปราจีนบุรี', desc: 'เมืองสมุนไพร', highlight: 'แก่งหินเพิง' },
+      { name: 'สระแก้ว', desc: 'ตลาดโรงเกลือ', highlight: 'ละลุ' }
+    ]
+  },
+  west: {
+    name: 'ภาคตะวันตก (5)',
+    color: 'bg-amber-100 text-amber-800',
+    provinces: [
+      { name: 'กาญจนบุรี', desc: 'สะพานข้ามแม่น้ำแคว', highlight: 'สังขละบุรี' },
+      { name: 'ตาก', desc: 'ทีลอซู', highlight: 'น้ำตกทีลอซู' },
+      { name: 'ประจวบคีรีขันธ์', desc: 'หัวหิน', highlight: 'อ่าวมะนาว' },
+      { name: 'เพชรบุรี', desc: 'เขาวัง ขนมหวาน', highlight: 'หาดชะอำ' },
+      { name: 'ราชบุรี', desc: 'โอ่งมังกร', highlight: 'สวนผึ้ง' }
+    ]
+  },
+  south: {
+    name: 'ภาคใต้ (14)',
+    color: 'bg-cyan-100 text-cyan-800',
+    provinces: [
+      { name: 'ภูเก็ต', desc: 'ไข่มุกอันดามัน', highlight: 'แหลมพรหมเทพ' },
+      { name: 'สุราษฎร์ธานี', desc: 'เมืองร้อยเกาะ', highlight: 'เขื่อนเชี่ยวหลาน' },
+      { name: 'นครศรีธรรมราช', desc: 'วัดพระมหาธาตุ', highlight: 'วัดเจดีย์ (ไอ้ไข่)' },
+      { name: 'สงขลา', desc: 'หาดใหญ่', highlight: 'นางเงือกทอง' },
+      { name: 'กระบี่', desc: 'พีพี อ่าวนาง', highlight: 'สระมรกต' },
+      { name: 'พังงา', desc: 'เสม็ดนางชี', highlight: 'หมู่เกาะสิมิลัน' },
+      { name: 'ตรัง', desc: 'เมืองหมูย่าง', highlight: 'ถ้ำมรกต' },
+      { name: 'สตูล', desc: 'อุทยานธรณีโลก', highlight: 'เกาะหลีเป๊ะ' },
+      { name: 'ชุมพร', desc: 'ประตูสู่ภาคใต้', highlight: 'หาดทรายรี' },
+      { name: 'ระนอง', desc: 'เมืองฝนแปดแดดสี่', highlight: 'ภูเขาหญ้า' },
+      { name: 'พัทลุง', desc: 'ล่องแก่ง', highlight: 'ทะเลน้อย' },
+      { name: 'ยะลา', desc: 'เบตง', highlight: 'Skywalk อัยเยอร์เวง' },
+      { name: 'ปัตตานี', desc: 'เมืองงามสามวัฒนธรรม', highlight: 'มัสยิดกลาง' },
+      { name: 'นราธิวาส', desc: 'ทักษิณราชตำหนัก', highlight: 'น้ำตกปาโจ' }
+    ]
+  }
+};
+const TOURISM_STATS = [{ province: 'กรุงเทพฯ', visitors: '22.5M', score: 98, color: 'bg-blue-500' }, { province: 'ภูเก็ต', visitors: '14.2M', score: 85, color: 'bg-teal-500' }, { province: 'ชลบุรี', visitors: '12.8M', score: 78, color: 'bg-indigo-500' }, { province: 'เชียงใหม่', visitors: '10.5M', score: 72, color: 'bg-green-500' }, { province: 'สุราษฎร์ฯ', visitors: '8.9M', score: 65, color: 'bg-orange-500' }];
+const DREAM_DESTINATIONS = [{ id: 1, name: 'คัปปาโดเกีย', location: 'ตุรกี', image: 'https://images.unsplash.com/photo-1641128324972-af3212f0f6bd?w=300', desc: 'ดินแดนบอลลูน' }, { id: 2, name: 'ซานโตรินี', location: 'กรีซ', image: 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=300', desc: 'เกาะขาวฟ้า' }, { id: 3, name: 'มัลดีฟส์', location: 'มัลดีฟส์', image: 'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=300', desc: 'ทะเลสีคราม' }, { id: 4, name: 'แสงเหนือ', location: 'ไอซ์แลนด์', image: 'https://images.unsplash.com/photo-1579033461380-adb47c3eb938?w=300', desc: 'มหัศจรรย์น่านฟ้า' }, { id: 5, name: 'ฮัลล์สตัทท์', location: 'ออสเตรีย', image: 'https://images.unsplash.com/photo-1501952476817-d7ae22e8ee4e?w=300', desc: 'หมู่บ้านริมน้ำ' }];
 
 // --- 3. MOCK DATA ---
 const INITIAL_USERS = [
@@ -51,25 +203,7 @@ const INITIAL_SERVICES = [
 
 const INITIAL_TRANSACTIONS = [];
 
-// --- COMPONENTS ---
-const Button = ({ children, onClick, variant = 'primary', className = '', disabled = false }) => {
-  const variants = { primary: "bg-blue-600 text-white hover:bg-blue-700 shadow-md", secondary: "bg-white text-gray-700 border hover:bg-gray-50", success: "bg-green-600 text-white hover:bg-green-700 shadow-md", danger: "bg-red-50 text-red-600 hover:bg-red-100", outline: "border border-blue-600 text-blue-600 hover:bg-blue-50" };
-  return <button onClick={onClick} disabled={disabled} className={`px-4 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${variants[variant]} ${className}`}>{children}</button>;
-};
-const Card = ({ children, className = '', onClick }) => <div onClick={onClick} className={`bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer ${className}`}>{children}</div>;
-const Badge = ({ status }) => {
-  const styles = { verified: 'bg-green-100 text-green-700', pending: 'bg-yellow-100 text-yellow-700', active: 'bg-blue-100 text-blue-700', approved: 'bg-green-100 text-green-700', rejected: 'bg-red-100 text-red-700' };
-  return <span className={`px-2 py-0.5 rounded-full text-xs font-bold uppercase ${styles[status] || 'bg-gray-100'}`}>{status === 'approved' ? 'อนุมัติแล้ว' : status === 'pending' ? 'รอตรวจสอบ' : status === 'verified' ? 'ยืนยันแล้ว' : status}</span>;
-};
-const calculateCountdown = (date) => {
-  if (!date) return null;
-  const diff = new Date(date) - new Date();
-  if (diff < 0) return "ออกเดินทางแล้ว";
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-  return `อีก ${days} วัน`;
-};
-
-// --- SUB-COMPONENTS ---
+// --- 4. SUB-COMPONENTS ---
 
 const ServiceCard = ({ service, onBook }) => (
   <div className="bg-white rounded-xl shadow-sm border overflow-hidden hover:shadow-md transition-all group">
@@ -314,19 +448,19 @@ export default function App() {
   const [regForm, setRegForm] = useState({ username: '', name: '', role: 'traveler', password: '', confirmPassword: '' });
   const [notification, setNotification] = useState(null);
 
-  // Persistence V22
+  // Persistence V25
   useEffect(() => {
-    const s = localStorage.getItem('tb_session_v22'); if (s) setCurrentUser(JSON.parse(s));
-    const u = localStorage.getItem('tb_users_v22'); if (u) setDbUsers(JSON.parse(u));
-    const p = localStorage.getItem('tb_posts_v22'); if (p) setPosts(JSON.parse(p));
-    const sv = localStorage.getItem('tb_services_v22'); if (sv) setServices(JSON.parse(sv));
-    const t = localStorage.getItem('tb_trans_v22'); if (t) setTransactions(JSON.parse(t));
+    const s = localStorage.getItem('tb_session_v25'); if (s) setCurrentUser(JSON.parse(s));
+    const u = localStorage.getItem('tb_users_v25'); if (u) setDbUsers(JSON.parse(u));
+    const p = localStorage.getItem('tb_posts_v25'); if (p) setPosts(JSON.parse(p));
+    const sv = localStorage.getItem('tb_services_v25'); if (sv) setServices(JSON.parse(sv));
+    const t = localStorage.getItem('tb_trans_v25'); if (t) setTransactions(JSON.parse(t));
   }, []);
-  useEffect(() => { localStorage.setItem('tb_users_v22', JSON.stringify(dbUsers)); }, [dbUsers]);
-  useEffect(() => { localStorage.setItem('tb_posts_v22', JSON.stringify(posts)); }, [posts]);
-  useEffect(() => { localStorage.setItem('tb_services_v22', JSON.stringify(services)); }, [services]);
-  useEffect(() => { localStorage.setItem('tb_trans_v22', JSON.stringify(transactions)); }, [transactions]);
-  useEffect(() => { if (currentUser) { localStorage.setItem('tb_session_v22', JSON.stringify(currentUser)); if(view==='landing') setView(currentUser.role==='admin'?'admin':currentUser.role==='business'?'business_dash':'dashboard'); } else { localStorage.removeItem('tb_session_v22'); } }, [currentUser]);
+  useEffect(() => { localStorage.setItem('tb_users_v25', JSON.stringify(dbUsers)); }, [dbUsers]);
+  useEffect(() => { localStorage.setItem('tb_posts_v25', JSON.stringify(posts)); }, [posts]);
+  useEffect(() => { localStorage.setItem('tb_services_v25', JSON.stringify(services)); }, [services]);
+  useEffect(() => { localStorage.setItem('tb_trans_v25', JSON.stringify(transactions)); }, [transactions]);
+  useEffect(() => { if (currentUser) { localStorage.setItem('tb_session_v25', JSON.stringify(currentUser)); if(view==='landing') setView(currentUser.role==='admin'?'admin':currentUser.role==='business'?'business_dash':'dashboard'); } else { localStorage.removeItem('tb_session_v25'); } }, [currentUser]);
 
   // Handlers
   const handleLogin = (e) => { e.preventDefault(); const u = dbUsers.find(x => x.username === loginForm.username && x.password === loginForm.password); if (u) setCurrentUser(u); else alert('ผิดพลาด'); };
@@ -354,6 +488,9 @@ export default function App() {
     };
     setTransactions([...transactions, newTrans]); setModal({open: false}); alert("แจ้งโอนสำเร็จ!");
   };
+  const handleServiceUpload = (url) => {
+    setNewItem({ ...newItem, image: url });
+  }
 
   const renderView = () => {
     if (view === 'admin') return <AdminPanel users={dbUsers} services={services} transactions={transactions} onVerifyUser={verifyUser} onDeleteUser={(id)=>setDbUsers(dbUsers.filter(u=>u.id!==id))} onApprovePayment={handleApprovePayment} onApproveService={approveService} />;
@@ -384,7 +521,10 @@ export default function App() {
            <button onClick={() => setIsSidebarOpen(true)} className="p-2 hover:bg-gray-100 rounded-lg"><Menu /></button>
            <div className="font-bold text-xl text-blue-600 flex items-center gap-2 cursor-pointer" onClick={() => { setView('dashboard'); setActiveChat(null); setActiveTripDetail(null); }}><Logo className="w-8 h-8"/> <span className="hidden sm:inline">TripbuddyTH</span></div>
         </div>
-        <div className="flex items-center gap-3 cursor-pointer"><div className="text-right hidden sm:block"><div className="font-bold text-sm">{currentUser.name}</div><div className="text-xs text-gray-500 capitalize">{currentUser.role}</div></div><img src={currentUser.image||`https://ui-avatars.com/api/?name=${currentUser.name}`} className="w-10 h-10 rounded-full border bg-gray-200 object-cover"/></div>
+        <div className="flex items-center gap-3 cursor-pointer" onClick={() => setModal({open: true, type: 'profile'})}>
+           <div className="text-right hidden sm:block"><div className="font-bold text-sm">{currentUser.name}</div><div className="text-xs text-gray-500 capitalize">{currentUser.role}</div></div>
+           <div className="w-10 h-10 rounded-full border bg-gray-200 overflow-hidden"><img src={currentUser.image || "https://ui-avatars.com/api/?name="+currentUser.name} className="w-full h-full object-cover"/></div>
+        </div>
       </nav>
 
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} user={currentUser} onEditProfile={() => setModal({open: true, type: 'profile'})} onLogout={handleLogout} setView={setView} />
