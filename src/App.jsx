@@ -6,14 +6,13 @@ import {
   Heart, Share2, XCircle, CheckCircle, UploadCloud, ShieldCheck, Smartphone,
   Star, Loader, DollarSign, FileText, Trash2, CreditCard, Search,
   BarChart2, Users, AlertCircle, Database, CalendarCheck, Clock, Ticket, Plane,
-  Navigation, Calendar, Info, Building, Bus, Briefcase, Tag, FileImage
+  Navigation, Calendar, Info, Building, Bus, Briefcase, Tag, FileImage, ExternalLink,
+  BedDouble, Car, Filter, Check, Upload
 } from 'lucide-react';
 
 // ==========================================
-// 1. ASSETS & HELPERS
+// 1. ASSETS & LOGO
 // ==========================================
-
-// Logo Component
 const Logo = ({ className }) => (
   <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
     <defs><linearGradient id="tripGradient" x1="0" y1="0" x2="200" y2="200" gradientUnits="userSpaceOnUse"><stop stopColor="#2563EB" /><stop offset="1" stopColor="#06B6D4" /></linearGradient></defs>
@@ -23,167 +22,35 @@ const Logo = ({ className }) => (
   </svg>
 );
 
-// UI Components
-const Button = ({ children, onClick, variant = 'primary', className = '', disabled = false }) => {
-  const variants = { primary: "bg-blue-600 text-white hover:bg-blue-700 shadow-md", secondary: "bg-white text-gray-700 border hover:bg-gray-50", success: "bg-green-600 text-white hover:bg-green-700 shadow-md", danger: "bg-red-50 text-red-600 hover:bg-red-100", outline: "border border-blue-600 text-blue-600 hover:bg-blue-50" };
-  return <button onClick={onClick} disabled={disabled} className={`px-4 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${variants[variant]} ${className}`}>{children}</button>;
-};
-
-const Card = ({ children, className = '', onClick }) => <div onClick={onClick} className={`bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer ${className}`}>{children}</div>;
-
-const Badge = ({ status }) => {
-  const styles = { verified: 'bg-green-100 text-green-700', pending: 'bg-yellow-100 text-yellow-700', active: 'bg-blue-100 text-blue-700', approved: 'bg-green-100 text-green-700', rejected: 'bg-red-100 text-red-700' };
-  return <span className={`px-2 py-0.5 rounded-full text-xs font-bold uppercase ${styles[status] || 'bg-gray-100'}`}>{status === 'approved' ? 'อนุมัติแล้ว' : status === 'pending' ? 'รอตรวจสอบ' : status === 'verified' ? 'ยืนยันแล้ว' : status}</span>;
-};
-
-const calculateCountdown = (date) => {
-  if (!date) return null;
-  const diff = new Date(date) - new Date();
-  if (diff < 0) return "ออกเดินทางแล้ว";
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-  return `อีก ${days} วัน`;
-};
-
-// File Uploader
-const FileUploader = ({ label, onUpload, value, type = 'image' }) => {
-  const [uploading, setUploading] = useState(false);
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setUploading(true);
-      setTimeout(() => {
-        setUploading(false);
-        const mockUrl = type === 'video' ? 'https://www.youtube.com/embed/dQw4w9WgXcQ' : 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=800'; 
-        onUpload(mockUrl);
-        alert('อัปโหลดสำเร็จ!');
-      }, 1500);
-    }
-  };
-  return (
-    <div className="mb-3"><label className="block text-sm font-medium text-gray-700 mb-1">{label}</label><div className="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center hover:bg-gray-50 transition-colors relative"><input type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFileChange} accept={type === 'video' ? "video/*" : "image/*"} />{uploading ? <div className="flex flex-col items-center text-blue-600"><Loader className="w-8 h-8 animate-spin mb-2"/><span className="text-xs">กำลังอัปโหลด...</span></div> : value ? <div className="flex items-center gap-3 bg-green-50 p-2 rounded-lg border border-green-200"><div className="text-xs text-green-800 font-bold">อัปโหลดสำเร็จ</div></div> : <div className="flex flex-col items-center text-gray-400"><UploadCloud className="w-8 h-8 mb-2"/><span className="text-sm">คลิกเพื่อเลือกไฟล์{type === 'video' ? 'วิดีโอ' : 'รูปภาพ'}</span></div>}</div></div>
-  );
-};
-
-// --- 2. DATA CONSTANTS (FULL 77 PROVINCES) ---
+// ==========================================
+// 2. DATASETS (STATIC DATA)
+// ==========================================
 const THAILAND_DATA = {
-  north: {
-    name: 'ภาคเหนือ (9)',
-    color: 'bg-green-100 text-green-800',
-    provinces: [
-      { name: 'เชียงใหม่', desc: 'ดอยอินทนนท์ ถนนคนเดิน', highlight: 'ดอยอินทนนท์' },
-      { name: 'เชียงราย', desc: 'วัดร่องขุ่น ดอยตุง', highlight: 'วัดร่องขุ่น' },
-      { name: 'น่าน', desc: 'กระซิบรัก ดอยเสมอดาว', highlight: 'ดอยเสมอดาว' },
-      { name: 'แม่ฮ่องสอน', desc: 'ปางอุ๋ง ทุ่งดอกบัวตอง', highlight: 'ปางอุ๋ง' },
-      { name: 'แพร่', desc: 'พระธาตุช่อแฮ แพะเมืองผี', highlight: 'แพะเมืองผี' },
-      { name: 'พะเยา', desc: 'กว๊านพะเยา', highlight: 'กว๊านพะเยา' },
-      { name: 'ลำปาง', desc: 'เมืองรถม้า', highlight: 'วัดพระธาตุลำปางหลวง' },
-      { name: 'ลำพูน', desc: 'พระธาตุหริภุญชัย', highlight: 'พระธาตุหริภุญชัย' },
-      { name: 'อุตรดิตถ์', desc: 'เมืองลับแล', highlight: 'ภูสอยดาว' }
-    ]
-  },
-  northeast: {
-    name: 'ภาคอีสาน (20)',
-    color: 'bg-orange-100 text-orange-800',
-    provinces: [
-      { name: 'นครราชสีมา', desc: 'เขาใหญ่ วังน้ำเขียว', highlight: 'อุทยานแห่งชาติเขาใหญ่' },
-      { name: 'ขอนแก่น', desc: 'เมืองไดโนเสาร์', highlight: 'เขื่อนอุบลรัตน์' },
-      { name: 'อุดรธานี', desc: 'คำชะโนด ทะเลบัวแดง', highlight: 'คำชะโนด' },
-      { name: 'อุบลราชธานี', desc: 'สามพันโบก ผาแต้ม', highlight: 'สามพันโบก' },
-      { name: 'หนองคาย', desc: 'บั้งไฟพญานาค', highlight: 'วัดผาตากเสื้อ' },
-      { name: 'เลย', desc: 'เชียงคาน ภูกระดึง', highlight: 'เชียงคาน' },
-      { name: 'บุรีรัมย์', desc: 'ปราสาทพนมรุ้ง', highlight: 'สนามช้างอารีน่า' },
-      { name: 'สุรินทร์', desc: 'ถิ่นช้างใหญ่', highlight: 'หมู่บ้านช้าง' },
-      { name: 'ศรีสะเกษ', desc: 'ผามออีแดง', highlight: 'ผามออีแดง' },
-      { name: 'สกลนคร', desc: 'เมืองหนองหาร', highlight: 'วัดพระธาตุเชิงชุม' },
-      { name: 'นครพนม', desc: 'พระธาตุพนม', highlight: 'พญาศรีสัตตนาคราช' },
-      { name: 'มุกดาหาร', desc: 'ตลาดอินโดจีน', highlight: 'หอแก้วมุกดาหาร' },
-      { name: 'ยโสธร', desc: 'เมืองบั้งไฟ', highlight: 'พญาคันคาก' },
-      { name: 'ร้อยเอ็ด', desc: 'บึงพลาญชัย', highlight: 'เจดีย์มหามงคลบัว' },
-      { name: 'กาฬสินธุ์', desc: 'ไดโนเสาร์ภูกุ้มข้าว', highlight: 'พิพิธภัณฑ์สิรินธร' },
-      { name: 'มหาสารคาม', desc: 'สะดืออีสาน', highlight: 'พระธาตุนาดูน' },
-      { name: 'ชัยภูมิ', desc: 'ทุ่งดอกกระเจียว', highlight: 'มอหินขาว' },
-      { name: 'อำนาจเจริญ', desc: 'พระมงคลมิ่งเมือง', highlight: 'พุทธอุทยาน' },
-      { name: 'หนองบัวลำภู', desc: 'ถ้ำเอราวัณ', highlight: 'วัดถ้ำกลองเพล' },
-      { name: 'บึงกาฬ', desc: 'ภูทอก หินสามวาฬ', highlight: 'ถ้ำนาคา' }
-    ]
-  },
-  central: {
-    name: 'ภาคกลาง (22)',
-    color: 'bg-yellow-100 text-yellow-800',
-    provinces: [
-      { name: 'กรุงเทพมหานคร', desc: 'เมืองหลวง วัดพระแก้ว', highlight: 'วัดอรุณฯ' },
-      { name: 'พระนครศรีอยุธยา', desc: 'เมืองเก่ามรดกโลก', highlight: 'วัดมหาธาตุ' },
-      { name: 'สระบุรี', desc: 'รอยพระพุทธบาท', highlight: 'น้ำตกเจ็ดสาวน้อย' },
-      { name: 'ลพบุรี', desc: 'เมืองลิง', highlight: 'พระปรางค์สามยอด' },
-      { name: 'สิงห์บุรี', desc: 'วีรชนบางระจัน', highlight: 'วัดพิกุลทอง' },
-      { name: 'ชัยนาท', desc: 'สวนนกชัยนาท', highlight: 'เขื่อนเจ้าพระยา' },
-      { name: 'อ่างทอง', desc: 'ตุ๊กตาชาววัง', highlight: 'วัดม่วง' },
-      { name: 'นครสวรรค์', desc: 'ปากน้ำโพ', highlight: 'บึงบอระเพ็ด' },
-      { name: 'อุทัยธานี', desc: 'เมืองพระชนกจักรี', highlight: 'วัดท่าซุง' },
-      { name: 'กำแพงเพชร', desc: 'กล้วยไข่เมืองกำแพง', highlight: 'น้ำตกคลองลาน' },
-      { name: 'สุโขทัย', desc: 'เมืองเก่าสุโขทัย', highlight: 'อุทยานประวัติศาสตร์' },
-      { name: 'พิษณุโลก', desc: 'พระพุทธชินราช', highlight: 'วัดพระศรีรัตนมหาธาตุ' },
-      { name: 'พิจิตร', desc: 'เมืองชาละวัน', highlight: 'บึงสีไฟ' },
-      { name: 'เพชรบูรณ์', desc: 'เขาค้อ ภูทับเบิก', highlight: 'เขาค้อ' },
-      { name: 'สุพรรณบุรี', desc: 'มังกรสวรรค์', highlight: 'บึงฉวาก' },
-      { name: 'นครปฐม', desc: 'พระปฐมเจดีย์', highlight: 'องค์พระปฐมเจดีย์' },
-      { name: 'สมุทรสาคร', desc: 'มหาชัย', highlight: 'ตลาดทะเลไทย' },
-      { name: 'สมุทรสงคราม', desc: 'อัมพวา', highlight: 'ตลาดร่มหุบ' },
-      { name: 'นนทบุรี', desc: 'ทุเรียนนนท์', highlight: 'เกาะเกร็ด' },
-      { name: 'ปทุมธานี', desc: 'เมืองบัว', highlight: 'วัดเจดีย์หอย' },
-      { name: 'สมุทรปราการ', desc: 'เมืองปากน้ำ', highlight: 'บางกระเจ้า' },
-      { name: 'นครนายก', desc: 'เมืองในฝันใกล้กรุง', highlight: 'เขื่อนขุนด่านฯ' }
-    ]
-  },
-  east: {
-    name: 'ภาคตะวันออก (7)',
-    color: 'bg-blue-100 text-blue-800',
-    provinces: [
-      { name: 'ชลบุรี', desc: 'พัทยา บางแสน', highlight: 'เกาะล้าน' },
-      { name: 'ระยอง', desc: 'เกาะเสม็ด', highlight: 'สวนผลไม้' },
-      { name: 'จันทบุรี', desc: 'เมืองผลไม้', highlight: 'เนินนางพญา' },
-      { name: 'ตราด', desc: 'เกาะช้าง', highlight: 'เกาะกูด' },
-      { name: 'ฉะเชิงเทรา', desc: 'หลวงพ่อโสธร', highlight: 'วัดโสธรวราราม' },
-      { name: 'ปราจีนบุรี', desc: 'เมืองสมุนไพร', highlight: 'แก่งหินเพิง' },
-      { name: 'สระแก้ว', desc: 'ตลาดโรงเกลือ', highlight: 'ละลุ' }
-    ]
-  },
-  west: {
-    name: 'ภาคตะวันตก (5)',
-    color: 'bg-amber-100 text-amber-800',
-    provinces: [
-      { name: 'กาญจนบุรี', desc: 'สะพานข้ามแม่น้ำแคว', highlight: 'สังขละบุรี' },
-      { name: 'ตาก', desc: 'ทีลอซู', highlight: 'น้ำตกทีลอซู' },
-      { name: 'ประจวบคีรีขันธ์', desc: 'หัวหิน', highlight: 'อ่าวมะนาว' },
-      { name: 'เพชรบุรี', desc: 'เขาวัง ขนมหวาน', highlight: 'หาดชะอำ' },
-      { name: 'ราชบุรี', desc: 'โอ่งมังกร', highlight: 'สวนผึ้ง' }
-    ]
-  },
-  south: {
-    name: 'ภาคใต้ (14)',
-    color: 'bg-cyan-100 text-cyan-800',
-    provinces: [
-      { name: 'ภูเก็ต', desc: 'ไข่มุกอันดามัน', highlight: 'แหลมพรหมเทพ' },
-      { name: 'สุราษฎร์ธานี', desc: 'เมืองร้อยเกาะ', highlight: 'เขื่อนเชี่ยวหลาน' },
-      { name: 'นครศรีธรรมราช', desc: 'วัดพระมหาธาตุ', highlight: 'วัดเจดีย์ (ไอ้ไข่)' },
-      { name: 'สงขลา', desc: 'หาดใหญ่', highlight: 'นางเงือกทอง' },
-      { name: 'กระบี่', desc: 'พีพี อ่าวนาง', highlight: 'สระมรกต' },
-      { name: 'พังงา', desc: 'เสม็ดนางชี', highlight: 'หมู่เกาะสิมิลัน' },
-      { name: 'ตรัง', desc: 'เมืองหมูย่าง', highlight: 'ถ้ำมรกต' },
-      { name: 'สตูล', desc: 'อุทยานธรณีโลก', highlight: 'เกาะหลีเป๊ะ' },
-      { name: 'ชุมพร', desc: 'ประตูสู่ภาคใต้', highlight: 'หาดทรายรี' },
-      { name: 'ระนอง', desc: 'เมืองฝนแปดแดดสี่', highlight: 'ภูเขาหญ้า' },
-      { name: 'พัทลุง', desc: 'ล่องแก่ง', highlight: 'ทะเลน้อย' },
-      { name: 'ยะลา', desc: 'เบตง', highlight: 'Skywalk อัยเยอร์เวง' },
-      { name: 'ปัตตานี', desc: 'เมืองงามสามวัฒนธรรม', highlight: 'มัสยิดกลาง' },
-      { name: 'นราธิวาส', desc: 'ทักษิณราชตำหนัก', highlight: 'น้ำตกปาโจ' }
-    ]
-  }
+  north: { name: 'ภาคเหนือ (9)', color: 'bg-green-100 text-green-800', provinces: [{ name: 'เชียงใหม่', desc: 'ดอยอินทนนท์ ถนนคนเดิน', highlight: 'ดอยอินทนนท์' }, { name: 'เชียงราย', desc: 'วัดร่องขุ่น ดอยตุง', highlight: 'วัดร่องขุ่น' }, { name: 'น่าน', desc: 'กระซิบรัก ดอยเสมอดาว', highlight: 'ดอยเสมอดาว' }, { name: 'แม่ฮ่องสอน', desc: 'ปางอุ๋ง ทุ่งดอกบัวตอง', highlight: 'ปางอุ๋ง' }, { name: 'แพร่', desc: 'แพะเมืองผี', highlight: 'แพะเมืองผี' }, { name: 'พะเยา', desc: 'กว๊านพะเยา', highlight: 'กว๊านพะเยา' }, { name: 'ลำปาง', desc: 'เมืองรถม้า', highlight: 'วัดพระธาตุลำปางหลวง' }, { name: 'ลำพูน', desc: 'พระธาตุหริภุญชัย', highlight: 'พระธาตุหริภุญชัย' }, { name: 'อุตรดิตถ์', desc: 'ภูสอยดาว', highlight: 'ภูสอยดาว' }] },
+  northeast: { name: 'ภาคอีสาน (20)', color: 'bg-orange-100 text-orange-800', provinces: [{ name: 'นครราชสีมา', desc: 'เขาใหญ่', highlight: 'เขาใหญ่' }, { name: 'ขอนแก่น', desc: 'เมืองไดโนเสาร์', highlight: 'เขื่อนอุบลรัตน์' }, { name: 'อุดรธานี', desc: 'คำชะโนด', highlight: 'คำชะโนด' }, { name: 'อุบลราชธานี', desc: 'สามพันโบก', highlight: 'สามพันโบก' }, { name: 'หนองคาย', desc: 'บั้งไฟพญานาค', highlight: 'วัดผาตากเสื้อ' }, { name: 'เลย', desc: 'เชียงคาน ภูกระดึง', highlight: 'เชียงคาน' }, { name: 'บุรีรัมย์', desc: 'พนมรุ้ง', highlight: 'สนามช้าง' }, { name: 'สุรินทร์', desc: 'ถิ่นช้างใหญ่', highlight: 'หมู่บ้านช้าง' }, { name: 'ศรีสะเกษ', desc: 'ผามออีแดง', highlight: 'ผามออีแดง' }, { name: 'สกลนคร', desc: 'หนองหาร', highlight: 'วัดพระธาตุเชิงชุม' }, { name: 'นครพนม', desc: 'พระธาตุพนม', highlight: 'พญาศรีสัตตนาคราช' }, { name: 'มุกดาหาร', desc: 'หอแก้ว', highlight: 'หอแก้ว' }, { name: 'ยโสธร', desc: 'บั้งไฟ', highlight: 'พญาคันคาก' }, { name: 'ร้อยเอ็ด', desc: 'บึงพลาญชัย', highlight: 'เจดีย์มหามงคลบัว' }, { name: 'กาฬสินธุ์', desc: 'ไดโนเสาร์', highlight: 'พิพิธภัณฑ์สิรินธร' }, { name: 'มหาสารคาม', desc: 'สะดืออีสาน', highlight: 'พระธาตุนาดูน' }, { name: 'ชัยภูมิ', desc: 'ทุ่งดอกกระเจียว', highlight: 'มอหินขาว' }, { name: 'อำนาจเจริญ', desc: 'พระมงคล', highlight: 'พุทธอุทยาน' }, { name: 'หนองบัวลำภู', desc: 'ถ้ำเอราวัณ', highlight: 'วัดถ้ำกลองเพล' }, { name: 'บึงกาฬ', desc: 'ภูทอก', highlight: 'ถ้ำนาคา' }] },
+  central: { name: 'ภาคกลาง (22)', color: 'bg-yellow-100 text-yellow-800', provinces: [{ name: 'กรุงเทพมหานคร', desc: 'วัดพระแก้ว', highlight: 'วัดอรุณฯ' }, { name: 'พระนครศรีอยุธยา', desc: 'เมืองเก่า', highlight: 'วัดมหาธาตุ' }, { name: 'สระบุรี', desc: 'น้ำตก', highlight: 'น้ำตกเจ็ดสาวน้อย' }, { name: 'ลพบุรี', desc: 'ลิง', highlight: 'พระปรางค์สามยอด' }, { name: 'สิงห์บุรี', desc: 'บางระจัน', highlight: 'วัดพิกุลทอง' }, { name: 'ชัยนาท', desc: 'สวนนก', highlight: 'เขื่อนเจ้าพระยา' }, { name: 'อ่างทอง', desc: 'ตุ๊กตาชาววัง', highlight: 'วัดม่วง' }, { name: 'นครสวรรค์', desc: 'ปากน้ำโพ', highlight: 'บึงบอระเพ็ด' }, { name: 'อุทัยธานี', desc: 'วัดท่าซุง', highlight: 'วัดท่าซุง' }, { name: 'กำแพงเพชร', desc: 'กล้วยไข่', highlight: 'น้ำตกคลองลาน' }, { name: 'สุโขทัย', desc: 'มรดกโลก', highlight: 'อุทยานประวัติศาสตร์' }, { name: 'พิษณุโลก', desc: 'พระพุทธชินราช', highlight: 'วัดพระศรีรัตนมหาธาตุ' }, { name: 'พิจิตร', desc: 'ชาละวัน', highlight: 'บึงสีไฟ' }, { name: 'เพชรบูรณ์', desc: 'เขาค้อ', highlight: 'เขาค้อ' }, { name: 'สุพรรณบุรี', desc: 'มังกร', highlight: 'บึงฉวาก' }, { name: 'นครปฐม', desc: 'เจดีย์', highlight: 'องค์พระปฐมเจดีย์' }, { name: 'สมุทรสาคร', desc: 'มหาชัย', highlight: 'ตลาดทะเลไทย' }, { name: 'สมุทรสงคราม', desc: 'อัมพวา', highlight: 'ตลาดร่มหุบ' }, { name: 'นนทบุรี', desc: 'เกาะเกร็ด', highlight: 'เกาะเกร็ด' }, { name: 'ปทุมธานี', desc: 'เมืองบัว', highlight: 'วัดเจดีย์หอย' }, { name: 'สมุทรปราการ', desc: 'ปากน้ำ', highlight: 'บางกระเจ้า' }, { name: 'นครนายก', desc: 'เขื่อน', highlight: 'เขื่อนขุนด่านฯ' }] },
+  east: { name: 'ภาคตะวันออก (7)', color: 'bg-blue-100 text-blue-800', provinces: [{ name: 'ชลบุรี', desc: 'พัทยา', highlight: 'เกาะล้าน' }, { name: 'ระยอง', desc: 'เสม็ด', highlight: 'สวนผลไม้' }, { name: 'จันทบุรี', desc: 'เนินนางพญา', highlight: 'จุดชมวิวเนินนางพญา' }, { name: 'ตราด', desc: 'เกาะช้าง', highlight: 'เกาะกูด' }, { name: 'ฉะเชิงเทรา', desc: 'หลวงพ่อโสธร', highlight: 'วัดโสธรวราราม' }, { name: 'ปราจีนบุรี', desc: 'ล่องแก่ง', highlight: 'แก่งหินเพิง' }, { name: 'สระแก้ว', desc: 'โรงเกลือ', highlight: 'ละลุ' }] },
+  west: { name: 'ภาคตะวันตก (5)', color: 'bg-amber-100 text-amber-800', provinces: [{ name: 'กาญจนบุรี', desc: 'สะพานมอญ', highlight: 'สังขละบุรี' }, { name: 'ตาก', desc: 'ทีลอซู', highlight: 'น้ำตกทีลอซู' }, { name: 'ประจวบคีรีขันธ์', desc: 'หัวหิน', highlight: 'อ่าวมะนาว' }, { name: 'เพชรบุรี', desc: 'ชะอำ', highlight: 'หาดชะอำ' }, { name: 'ราชบุรี', desc: 'สวนผึ้ง', highlight: 'สวนผึ้ง' }] },
+  south: { name: 'ภาคใต้ (14)', color: 'bg-cyan-100 text-cyan-800', provinces: [{ name: 'ภูเก็ต', desc: 'แหลมพรหมเทพ', highlight: 'แหลมพรหมเทพ' }, { name: 'สุราษฎร์ธานี', desc: 'สมุย', highlight: 'เขื่อนเชี่ยวหลาน' }, { name: 'นครศรีธรรมราช', desc: 'ไอ้ไข่', highlight: 'วัดเจดีย์ (ไอ้ไข่)' }, { name: 'สงขลา', desc: 'หาดใหญ่', highlight: 'นางเงือกทอง' }, { name: 'กระบี่', desc: 'พีพี', highlight: 'สระมรกต' }, { name: 'พังงา', desc: 'เสม็ดนางชี', highlight: 'หมู่เกาะสิมิลัน' }, { name: 'ตรัง', desc: 'หมูย่าง', highlight: 'ถ้ำมรกต' }, { name: 'สตูล', desc: 'หลีเป๊ะ', highlight: 'เกาะหลีเป๊ะ' }, { name: 'ชุมพร', desc: 'หาดทรายรี', highlight: 'หาดทรายรี' }, { name: 'ระนอง', desc: 'บ่อน้ำร้อน', highlight: 'ภูเขาหญ้า' }, { name: 'พัทลุง', desc: 'ทะเลน้อย', highlight: 'ทะเลน้อย' }, { name: 'ยะลา', desc: 'เบตง', highlight: 'Skywalk อัยเยอร์เวง' }, { name: 'ปัตตานี', desc: 'มัสยิดกลาง', highlight: 'มัสยิดกลาง' }, { name: 'นราธิวาส', desc: 'น้ำตก', highlight: 'น้ำตกปาโจ' }] }
 };
-const TOURISM_STATS = [{ province: 'กรุงเทพฯ', visitors: '22.5M', score: 98, color: 'bg-blue-500' }, { province: 'ภูเก็ต', visitors: '14.2M', score: 85, color: 'bg-teal-500' }, { province: 'ชลบุรี', visitors: '12.8M', score: 78, color: 'bg-indigo-500' }, { province: 'เชียงใหม่', visitors: '10.5M', score: 72, color: 'bg-green-500' }, { province: 'สุราษฎร์ฯ', visitors: '8.9M', score: 65, color: 'bg-orange-500' }];
-const DREAM_DESTINATIONS = [{ id: 1, name: 'คัปปาโดเกีย', location: 'ตุรกี', image: 'https://images.unsplash.com/photo-1641128324972-af3212f0f6bd?w=300', desc: 'ดินแดนบอลลูน' }, { id: 2, name: 'ซานโตรินี', location: 'กรีซ', image: 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=300', desc: 'เกาะขาวฟ้า' }, { id: 3, name: 'มัลดีฟส์', location: 'มัลดีฟส์', image: 'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=300', desc: 'ทะเลสีคราม' }, { id: 4, name: 'แสงเหนือ', location: 'ไอซ์แลนด์', image: 'https://images.unsplash.com/photo-1579033461380-adb47c3eb938?w=300', desc: 'มหัศจรรย์น่านฟ้า' }, { id: 5, name: 'ฮัลล์สตัทท์', location: 'ออสเตรีย', image: 'https://images.unsplash.com/photo-1501952476817-d7ae22e8ee4e?w=300', desc: 'หมู่บ้านริมน้ำ' }];
 
-// --- 3. MOCK DATA ---
+const TOURISM_STATS = [
+  { province: 'กรุงเทพมหานคร', visitors: '22.5M', score: 98, color: 'bg-blue-500' },
+  { province: 'ภูเก็ต', visitors: '14.2M', score: 85, color: 'bg-teal-500' },
+  { province: 'ชลบุรี (พัทยา)', visitors: '12.8M', score: 78, color: 'bg-indigo-500' },
+  { province: 'เชียงใหม่', visitors: '10.5M', score: 72, color: 'bg-green-500' },
+  { province: 'สุราษฎร์ธานี', visitors: '8.9M', score: 65, color: 'bg-orange-500' },
+];
+
+const DREAM_DESTINATIONS = [
+  { id: 1, name: 'คัปปาโดเกีย', location: 'ตุรกี', image: 'https://images.unsplash.com/photo-1641128324972-af3212f0f6bd?w=400', desc: 'ดินแดนบอลลูนสีสวย' },
+  { id: 2, name: 'ซานโตรินี', location: 'กรีซ', image: 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=400', desc: 'เกาะสวรรค์สีขาวฟ้า' },
+  { id: 3, name: 'มัลดีฟส์', location: 'มัลดีฟส์', image: 'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=400', desc: 'ทะเลสีครามสุดพักผ่อน' },
+  { id: 4, name: 'แสงเหนือ', location: 'ไอซ์แลนด์', image: 'https://images.unsplash.com/photo-1579033461380-adb47c3eb938?w=400', desc: 'มหัศจรรย์น่านฟ้า' },
+  { id: 5, name: 'ฮัลล์สตัทท์', location: 'ออสเตรีย', image: 'https://images.unsplash.com/photo-1501952476817-d7ae22e8ee4e?w=400', desc: 'หมู่บ้านริมน้ำสุดสวย' },
+];
+
+// --- 3. MOCK DATA (Demo State) ---
 const INITIAL_USERS = [
   { id: 1, username: 'traveler1', password: '123', role: 'traveler', name: 'Alex Explorer', status: 'verified', image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200', contact: 'IG: alex_travel' },
   { id: 2, username: 'guide1', password: '123', role: 'guide', name: 'ไกด์สมศรี', status: 'verified', image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200', contact: 'Line: @somsri', verifyRequest: 'ไกด์เชียงใหม่' },
@@ -192,8 +59,38 @@ const INITIAL_USERS = [
 ];
 
 const INITIAL_POSTS = [
-  { id: 1, title: '🔥 โปรฯ ภูเก็ต 3 วัน 2 คืน', location: 'ภูเก็ต', author: 'ไกด์สมศรี', type: 'trip', media: 'https://images.unsplash.com/photo-1589394815804-989b3b785d51?w=600', chat: [], likes: 342, price: 4990, participants: [], desc: 'รวมที่พัก + ดำน้ำ', date: '2025-05-15', maxPeople: 10, gps: '7.88, 98.39' },
-  { id: 2, title: 'หาเพื่อนเดินตลาดอัมพวา', location: 'สมุทรสงคราม', author: 'Alex Explorer', type: 'trip', media: 'https://images.unsplash.com/photo-1598970434795-0c54fe7c0648?w=600', chat: [], likes: 12, price: 0, participants: ['Alex Explorer'], desc: 'หารค่าน้ำมัน', date: '2025-02-20', maxPeople: 4, gps: '13.42, 99.95' }
+  { 
+    id: 1, 
+    title: '🏝️ สุดยอดทริปภูเก็ต 3 วัน 2 คืน (ดำน้ำ + พักหรู)', 
+    location: 'ภูเก็ต', 
+    gps: '7.763615, 98.371266',
+    date: '2026-04-12', 
+    maxPeople: 20,
+    desc: 'สัมผัสประสบการณ์สุดพิเศษกับทริปภูเก็ตแบบจัดเต็ม! \nวันที่ 1: เดินชมเมืองเก่าภูเก็ต ชิมอาหารพื้นเมือง \nวันที่ 2: ล่องเรือ Speedboat ดำน้ำดูปะการังที่เกาะพีพีและอ่าวมาหยา \nวันที่ 3: พักผ่อนสุดหรูที่ศรีพันวา และชมพระอาทิตย์ตกที่แหลมพรหมเทพ \nราคานี้รวมที่พัก อาหาร และรถรับส่งตลอดการเดินทาง',
+    author: 'ไกด์สมศรี', 
+    type: 'trip', 
+    media: 'https://images.unsplash.com/photo-1589394815804-989b3b785d51?w=800&auto=format&fit=crop&q=60', 
+    chat: [], 
+    likes: 342, 
+    price: 4990, 
+    participants: [] 
+  },
+  { 
+    id: 2, 
+    title: 'หาเพื่อนเดินตลาดน้ำอัมพวา เสาร์นี้! 🚣', 
+    location: 'สมุทรสงคราม', 
+    gps: '13.4258, 99.9554',
+    date: '2026-02-20',
+    maxPeople: 5,
+    desc: 'เน้นหาของกิน ถ่ายรูปชิลๆ หารค่าน้ำมันกันครับ ออกเดินทางจากอนุสาวรีย์ฯ 9 โมงเช้า',
+    author: 'นักเดินทาง Alex', 
+    type: 'trip', 
+    media: 'https://images.unsplash.com/photo-1598970434795-0c54fe7c0648?w=600', 
+    chat: [{sender: 'ไกด์สมศรี', text: 'ไปกี่โมงคะ สนใจๆ', time: '10:00'}], 
+    likes: 12, 
+    price: 0, 
+    participants: ['นักเดินทาง Alex'] 
+  }
 ];
 
 const INITIAL_SERVICES = [
@@ -201,16 +98,92 @@ const INITIAL_SERVICES = [
   { id: 202, type: 'transport', name: 'รถแดงนำเที่ยว ดอยสุเทพ', location: 'เชียงใหม่', price: 500, image: 'https://images.unsplash.com/photo-1596423736737-12d8a7c29377?w=600', owner: 'ลุงตู่ รถตู้ซิ่ง', status: 'approved', desc: 'เหมาวัน พาเที่ยวรอบเมือง' }
 ];
 
-const INITIAL_TRANSACTIONS = [];
+const INITIAL_TRANSACTIONS = [
+  { id: 101, from: 'นักเดินทาง Alex', to: 'ไกด์สมศรี', amount: 4990, date: '2024-02-15', status: 'pending', slip: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=200', postId: 1, title: 'โปรฯ ภูเก็ต 3 วัน 2 คืน' }
+];
 
-// --- 4. SUB-COMPONENTS ---
+// --- COMPONENTS ---
+const Button = ({ children, onClick, variant = 'primary', className = '', disabled = false }) => {
+  const variants = { primary: "bg-blue-600 text-white hover:bg-blue-700 shadow-md", secondary: "bg-white text-gray-700 border hover:bg-gray-50", success: "bg-green-600 text-white hover:bg-green-700 shadow-md", danger: "bg-red-50 text-red-600 hover:bg-red-100", outline: "border border-blue-600 text-blue-600 hover:bg-blue-50" };
+  return <button onClick={onClick} disabled={disabled} className={`px-4 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${variants[variant]} ${className}`}>{children}</button>;
+};
+const Card = ({ children, className = '', onClick }) => <div onClick={onClick} className={`bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer ${className}`}>{children}</div>;
+const Badge = ({ status }) => {
+  const styles = { verified: 'bg-green-100 text-green-700', pending: 'bg-yellow-100 text-yellow-700', active: 'bg-blue-100 text-blue-700', approved: 'bg-green-100 text-green-700', rejected: 'bg-red-100 text-red-700' };
+  return <span className={`px-2 py-0.5 rounded-full text-xs font-bold uppercase ${styles[status] || 'bg-gray-100'}`}>{status === 'approved' ? 'อนุมัติแล้ว' : status === 'pending' ? 'รอตรวจสอบ' : status === 'verified' ? 'ยืนยันแล้ว' : status}</span>;
+};
+const calculateCountdown = (date) => {
+  if (!date) return null;
+  const diff = new Date(date) - new Date();
+  if (diff < 0) return "ออกเดินทางแล้ว";
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  return `อีก ${days} วัน`;
+};
 
+// --- FILE UPLOADER (LOCAL FILE PREVIEW - INSTANT) ---
+const FileUploader = ({ label, onUpload, value, type = 'image' }) => {
+  const fileInputRef = useRef(null);
+  
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Create local blob URL immediately (No fake delay needed for demo feeling, but keeps it snappy)
+      const objectUrl = URL.createObjectURL(file);
+      onUpload(objectUrl);
+    }
+  };
+
+  return (
+    <div className="mb-4">
+      <label className="block text-sm font-medium text-gray-700 mb-2">{label}</label>
+      <div 
+        className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:bg-blue-50 hover:border-blue-300 transition-all cursor-pointer group"
+        onClick={() => fileInputRef.current.click()}
+      >
+        <input 
+          type="file" 
+          ref={fileInputRef}
+          className="hidden" 
+          onChange={handleFileChange} 
+          accept={type === 'video' ? "video/*" : "image/*"} 
+        />
+        
+        {value ? (
+          <div className="relative w-full h-48 bg-gray-100 rounded-lg overflow-hidden group/preview shadow-sm">
+            {type === 'video' ? (
+               <div className="w-full h-full flex flex-col items-center justify-center bg-black text-white">
+                 <Video className="w-12 h-12 mb-2"/>
+                 <span className="text-xs">วิดีโอพร้อมใช้งาน</span>
+               </div>
+            ) : (
+               <img src={value} className="w-full h-full object-cover" alt="Preview" />
+            )}
+            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/preview:opacity-100 transition-opacity">
+              <span className="text-white text-sm font-bold bg-black/60 px-3 py-1.5 rounded-full flex items-center gap-2 backdrop-blur-sm"><Edit className="w-4 h-4"/> เปลี่ยนรูปภาพ</span>
+            </div>
+            <div className="absolute top-2 right-2 bg-green-500 text-white p-1.5 rounded-full shadow-md"><CheckCircle className="w-4 h-4"/></div>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-4 text-gray-400 group-hover:text-blue-500 transition-colors">
+            <div className="bg-gray-100 p-4 rounded-full mb-3 group-hover:bg-blue-100 transition-colors">
+               <Upload className="w-8 h-8"/>
+            </div>
+            <span className="text-sm font-semibold">คลิกเพื่ออัปโหลด{type === 'video' ? 'วิดีโอ' : 'รูปภาพ'}</span>
+            <span className="text-xs opacity-70 mt-1">รองรับไฟล์จากเครื่องของคุณ</span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// --- SUB-COMPONENTS ---
 const ServiceCard = ({ service, onBook }) => (
   <div className="bg-white rounded-xl shadow-sm border overflow-hidden hover:shadow-md transition-all group">
     <div className="h-40 overflow-hidden relative">
       <img src={service.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
       <div className="absolute top-2 right-2 bg-white/90 backdrop-blur px-2 py-1 rounded text-xs font-bold flex items-center gap-1">
-        {service.type === 'accommodation' ? <Building className="w-3 h-3 text-blue-600"/> : <Bus className="w-3 h-3 text-orange-600"/>}
+        {service.type === 'accommodation' ? <BedDouble className="w-3 h-3 text-blue-600"/> : <Car className="w-3 h-3 text-orange-600"/>}
         {service.type === 'accommodation' ? 'ที่พัก' : 'เดินทาง'}
       </div>
       <div className="absolute bottom-2 left-2 bg-black/60 text-white text-[10px] px-2 py-1 rounded flex items-center gap-1"><MapPin className="w-3 h-3"/> {service.location}</div>
@@ -235,43 +208,51 @@ const TripDetailModal = ({ post, user, onClose, onJoin, onChat, usersDb }) => {
     return u?.image || `https://ui-avatars.com/api/?name=${name}`;
   });
 
+  const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${post.gps ? post.gps.replace(/\s/g, '') : ''}`;
+
   return (
-    <div className="fixed inset-0 bg-black/60 z-[80] flex items-center justify-center p-4 backdrop-blur-md animate-in fade-in">
+    <div className="fixed inset-0 bg-black/80 z-[80] flex items-center justify-center p-4 backdrop-blur-md animate-in fade-in">
       <div className="bg-white rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl relative flex flex-col max-h-[90vh]">
-        <div className="h-48 relative bg-gray-200">
-          <button onClick={onClose} className="absolute top-4 right-4 bg-black/50 text-white p-2 rounded-full z-10"><XCircle /></button>
+        <div className="h-56 relative bg-gray-900">
+          <button onClick={onClose} className="absolute top-4 right-4 bg-white/20 text-white p-2 rounded-full z-10 hover:bg-white/40"><XCircle /></button>
           {post.type === 'video' ? <div className="w-full h-full bg-black flex items-center justify-center"><Video className="text-white w-12 h-12 opacity-50"/></div> : <img src={post.media} className="w-full h-full object-cover" />}
-          <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 to-transparent p-6"><h2 className="text-2xl font-bold text-white">{post.title}</h2></div>
-        </div>
-        <div className="p-6 overflow-y-auto flex-1 space-y-4">
-          <div className="flex justify-between items-center bg-blue-50 p-4 rounded-xl border border-blue-100">
-            <div><div className="text-xs text-blue-600 font-bold uppercase tracking-wider">สถานะทริป</div><div className="font-bold text-gray-800">{countdown || "ยังไม่ระบุวัน"}</div></div>
-            {post.price > 0 && <div className="text-right font-bold text-blue-600 text-xl">฿{post.price.toLocaleString()}</div>}
+          <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/90 to-transparent p-6 pt-20">
+             <h2 className="text-2xl font-bold text-white drop-shadow-md">{post.title}</h2>
           </div>
-          <div><h3 className="font-bold text-gray-800 mb-1 flex items-center gap-2"><Info className="w-4 h-4"/> รายละเอียด</h3><p className="text-gray-600 text-sm bg-gray-50 p-3 rounded-lg">{post.desc}</p></div>
+        </div>
+        <div className="p-6 overflow-y-auto flex-1 space-y-6">
+          <div className="flex justify-between items-center bg-indigo-50 p-4 rounded-xl border border-indigo-100">
+            <div>
+               <div className="text-xs font-bold text-indigo-600 uppercase tracking-wider">วันเดินทาง</div>
+               <div className="text-xl font-bold text-gray-800">{post.date || "ไม่ระบุ"}</div>
+            </div>
+            <div className="text-right">
+               <div className="text-xs font-bold text-gray-500 uppercase">ราคา/ท่าน</div>
+               <div className="text-2xl font-bold text-blue-600">{post.price > 0 ? `฿${post.price.toLocaleString()}` : 'ฟรี'}</div>
+            </div>
+          </div>
+          <div><h3 className="font-bold text-gray-800 mb-2 flex items-center gap-2"><Info className="w-4 h-4"/> รายละเอียดทริป</h3><p className="text-gray-600 text-sm bg-gray-50 p-4 rounded-xl leading-relaxed whitespace-pre-line border border-gray-100">{post.desc}</p></div>
           <div className="grid grid-cols-2 gap-4">
-            <div className="border p-3 rounded-xl"><div className="text-xs text-gray-400">สถานที่</div><div className="text-sm font-bold flex items-center gap-1"><MapPin className="w-3 h-3 text-red-500"/>{post.location}</div></div>
-            <div className="border p-3 rounded-xl"><div className="text-xs text-gray-400">พิกัด GPS</div><div className="text-sm font-bold flex items-center gap-1"><Navigation className="w-3 h-3 text-blue-500"/>{post.gps}</div></div>
+            <div className="border p-3 rounded-xl hover:bg-gray-50 transition-colors"><div className="text-xs text-gray-400 mb-1">สถานที่หลัก</div><div className="text-sm font-bold flex items-center gap-1"><MapPin className="w-4 h-4 text-red-500"/>{post.location}</div></div>
+            <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer" className="border p-3 rounded-xl hover:bg-blue-50 transition-colors cursor-pointer group"><div className="text-xs text-gray-400 mb-1">พิกัด GPS (กดเพื่อนำทาง)</div><div className="text-sm font-bold flex items-center gap-1 text-blue-600 group-hover:underline"><Navigation className="w-4 h-4"/> {post.gps || '-'} <ExternalLink className="w-3 h-3 ml-1"/></div></a>
           </div>
-          <div><div className="flex justify-between text-sm font-bold mb-2"><span>ผู้เข้าร่วม ({post.participants?.length || 0})</span></div><div className="flex -space-x-2">{participantAvatars.map((img, i) => (<img key={i} className="h-8 w-8 rounded-full border-2 border-white object-cover" src={img} />))}</div></div>
+          <div><div className="flex justify-between text-sm font-bold mb-2 text-gray-700"><span>เพื่อนร่วมทริป ({post.participants?.length || 0}/{post.maxPeople})</span></div><div className="flex -space-x-2 overflow-hidden py-1">{participantAvatars.length > 0 ? participantAvatars.map((img, i) => (<img key={i} className="h-8 w-8 rounded-full border-2 border-white object-cover" src={img} />)) : <span className="text-sm text-gray-400">ยังไม่มีผู้เข้าร่วม</span>}</div></div>
         </div>
-        <div className="p-4 border-t bg-gray-50 flex gap-2">
-          <Button variant="secondary" className="flex-1" onClick={onChat}><MessageSquare className="w-4 h-4"/> แชท</Button>
-          {!isJoined ? <Button className="flex-[2]" onClick={onJoin}>{post.price > 0 ? 'จองทริป' : 'เข้าร่วมฟรี'}</Button> : <Button variant="success" className="flex-[2]"><CheckCircle className="w-4 h-4"/> เข้าร่วมแล้ว</Button>}
-        </div>
+        <div className="p-4 border-t bg-gray-50 flex gap-3"><button onClick={onChat} className="flex-1 py-3 bg-white border border-gray-300 rounded-xl font-bold text-gray-700 hover:bg-gray-100 flex items-center justify-center gap-2 transition-colors"><MessageSquare className="w-4 h-4"/> พูดคุย</button>{!isJoined ? <button onClick={onJoin} className="flex-[2] py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all transform active:scale-95">{post.price > 0 ? 'จองทริปทันที' : 'ขอเข้าร่วมฟรี'}</button> : <button className="flex-[2] py-3 bg-green-500 text-white rounded-xl font-bold cursor-default flex items-center justify-center gap-2"><CheckCircle className="w-5 h-5"/> เข้าร่วมแล้ว</button>}</div>
       </div>
     </div>
   );
 };
 
 const TourismInsights = () => (
-  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8 animate-in fade-in slide-in-from-bottom duration-500">
-    <div className="flex flex-col md:flex-row gap-8">
+  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-8 animate-in fade-in slide-in-from-bottom duration-500 relative overflow-hidden">
+    <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50 rounded-full blur-3xl -z-10 translate-x-1/2 -translate-y-1/2"></div>
+    <div className="flex flex-col md:flex-row gap-10 items-center">
       <div className="flex-1 space-y-6">
-        <div><h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2 mb-2"><Compass className="text-blue-600 w-8 h-8"/> เกี่ยวกับ TripbuddyTH</h2><p className="text-gray-500 leading-relaxed">แพลตฟอร์มท่องเที่ยวครบวงจร เชื่อมต่อนักเดินทาง ไกด์ และผู้ประกอบการ</p></div>
-        <div className="grid grid-cols-3 gap-4"><div className="bg-blue-50 p-4 rounded-xl text-center"><Users className="w-6 h-6 text-blue-600 mx-auto mb-2"/><div className="text-2xl font-bold text-blue-800">12K+</div><div className="text-xs text-blue-600">ผู้ใช้งาน</div></div><div className="bg-green-50 p-4 rounded-xl text-center"><Map className="w-6 h-6 text-green-600 mx-auto mb-2"/><div className="text-2xl font-bold text-green-800">850+</div><div className="text-xs text-green-600">ทริป</div></div><div className="bg-orange-50 p-4 rounded-xl text-center"><Star className="w-6 h-6 text-orange-600 mx-auto mb-2"/><div className="text-2xl font-bold text-orange-800">4.8</div><div className="text-xs text-orange-600">รีวิว</div></div></div>
+        <div><div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-600 text-xs font-bold mb-3"><Compass className="w-3 h-3"/> Travel Community</div><h2 className="text-3xl font-bold text-gray-900 mb-4 leading-tight">ยินดีต้อนรับสู่ <span className="text-blue-600">ThaiBuddy</span> <br/>เพื่อนร่วมทางที่ดีที่สุดของคุณ</h2><p className="text-gray-600 leading-relaxed text-sm md:text-base">ThaiBuddy เกิดขึ้นจากความตั้งใจที่จะสนับสนุนการท่องเที่ยวไทย โดยเป็นสื่อกลางเชื่อมโยงระหว่าง <strong>"นักเดินทาง"</strong> ที่ต้องการประสบการณ์แปลกใหม่ กับ <strong>"ไกด์ท้องถิ่น"</strong> และ <strong>"ผู้ประกอบการ"</strong> ที่มีความเชี่ยวชาญในพื้นที่ เพื่อให้ทุกการเดินทางมีความหมาย สะดวกปลอดภัย และสร้างรายได้สู่ชุมชนอย่างยั่งยืน</p></div>
+        <div className="flex gap-8 border-t pt-6"><div><div className="text-3xl font-bold text-gray-900">77</div><div className="text-xs text-gray-500 mt-1">จังหวัดทั่วไทย</div></div><div><div className="text-3xl font-bold text-gray-900">100+</div><div className="text-xs text-gray-500 mt-1">ทริปและกิจกรรม</div></div><div><div className="text-3xl font-bold text-gray-900">24<span className="text-sm">/7</span></div><div className="text-xs text-gray-500 mt-1">พร้อมดูแลคุณ</div></div></div>
       </div>
-      <div className="flex-1 bg-gray-50 rounded-xl p-5 border border-gray-100"><h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2"><BarChart2 className="w-5 h-5 text-indigo-600"/> 5 อันดับจังหวัดยอดฮิต</h3><div className="space-y-4">{TOURISM_STATS.map((item, index) => (<div key={index} className="space-y-1"><div className="flex justify-between text-sm"><span className="font-medium text-gray-700 flex items-center gap-2"><span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs text-white ${index < 3 ? 'bg-yellow-400' : 'bg-gray-400'}`}>{index + 1}</span>{item.province}</span><span className="text-gray-500 text-xs">{item.visitors}</span></div><div className="h-2 bg-gray-200 rounded-full overflow-hidden"><div className={`h-full ${item.color} rounded-full`} style={{ width: `${item.score}%` }}></div></div></div>))}</div></div>
+      <div className="flex-1 w-full"><div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 relative"><h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2"><BarChart2 className="w-5 h-5 text-indigo-600"/> จังหวัดยอดนิยมประจำเดือน</h3><div className="space-y-4">{TOURISM_STATS.map((item, index) => (<div key={index} className="space-y-1"><div className="flex justify-between text-sm"><span className="font-medium text-gray-700 flex items-center gap-2"><span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs text-white ${index < 3 ? 'bg-yellow-400' : 'bg-gray-400'}`}>{index + 1}</span>{item.province}</span><span className="text-gray-500 text-xs">{item.visitors}</span></div><div className="h-2 bg-gray-200 rounded-full overflow-hidden"><div className={`h-full ${item.color} rounded-full`} style={{ width: `${item.score}%` }}></div></div></div>))}</div></div></div>
     </div>
   </div>
 );
@@ -296,8 +277,8 @@ const Sidebar = ({ isOpen, onClose, user, onEditProfile, onLogout, setView }) =>
              <button onClick={() => { setView('business_dash'); onClose(); }} className="w-full flex items-center gap-3 p-3 hover:bg-indigo-50 rounded-xl text-gray-700 transition-colors"><Briefcase className="w-5 h-5 text-indigo-600" /> จัดการธุรกิจ</button>
           )}
 
-          <button onClick={() => { setView('my_activity'); onClose(); }} className="w-full flex items-center gap-3 p-3 hover:bg-purple-50 rounded-xl text-gray-700 transition-colors"><CalendarCheck className="w-5 h-5 text-purple-600" /> ประวัติการจอง</button>
-          {user.role === 'admin' && <button onClick={() => { setView('admin'); onClose(); }} className="w-full flex items-center gap-3 p-3 hover:bg-orange-50 rounded-xl text-gray-700 transition-colors"><Database className="w-5 h-5 text-orange-600" /> ระบบหลังบ้าน</button>}
+          <button onClick={() => { setView('my_activity'); onClose(); }} className="w-full flex items-center gap-3 p-3 hover:bg-purple-50 rounded-xl text-gray-700 transition-colors"><CalendarCheck className="w-5 h-5 text-purple-600" /> ข้อมูลการจองของฉัน</button>
+          {user.role === 'admin' && <button onClick={() => { setView('admin'); onClose(); }} className="w-full flex items-center gap-3 p-3 hover:bg-orange-50 rounded-xl text-gray-700 transition-colors"><Database className="w-5 h-5 text-orange-600" /> Admin Dashboard</button>}
         </div>
         <div className="p-4 border-t"><button onClick={onLogout} className="w-full flex items-center gap-3 p-3 hover:bg-red-50 rounded-xl text-red-600 transition-colors"><LogOut className="w-5 h-5" /> ออกจากระบบ</button></div>
       </div>
@@ -312,21 +293,44 @@ const ChatRoom = ({ trip, currentUser, onBack, onSendMessage }) => {
   return (
     <div className="fixed inset-0 z-[100] bg-white flex flex-col md:relative md:h-[600px] md:rounded-xl md:shadow-xl md:border md:overflow-hidden">
       <div className="p-4 bg-white border-b shadow-sm flex justify-between items-center z-10"><div className="flex items-center gap-3"><button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-full text-gray-600">←</button><div className="w-10 h-10 rounded-full overflow-hidden border">{trip.type === 'video' ? <div className="bg-red-100 w-full h-full flex items-center justify-center"><Video className="text-red-500"/></div> : <img src={trip.media} className="w-full h-full object-cover" />}</div><div><h3 className="font-bold text-gray-800 line-clamp-1 text-sm md:text-base">{trip.title}</h3><p className="text-xs text-green-600 flex items-center gap-1">● ออนไลน์</p></div></div></div>
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#F0F2F5]">{trip.chat.map((msg, i) => { const isMe = msg.sender === currentUser.name; return (<div key={i} className={`flex w-full ${isMe ? 'justify-end' : 'justify-start'}`}><div className={`flex max-w-[80%] gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>{!isMe && <div className="w-8 h-8 rounded-full bg-gray-300 flex-shrink-0 flex items-center justify-center text-xs font-bold text-gray-600 border border-white">{msg.sender[0]}</div>}<div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>{!isMe && <span className="text-[10px] text-gray-500 ml-1 mb-1">{msg.sender}</span>}<div className={`px-4 py-2 rounded-2xl shadow-sm text-sm break-words ${isMe ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-white text-gray-800 rounded-tl-none border'}`}>{msg.text}</div><span className="text-[10px] text-gray-400 mt-1 mx-1">{msg.time}</span></div></div></div>); })}</div>
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#F0F2F5]">{trip.chat && trip.chat.map((msg, i) => { const isMe = msg.sender === currentUser.name; return (<div key={i} className={`flex w-full ${isMe ? 'justify-end' : 'justify-start'}`}><div className={`flex max-w-[80%] gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>{!isMe && <div className="w-8 h-8 rounded-full bg-gray-300 flex-shrink-0 flex items-center justify-center text-xs font-bold text-gray-600 border border-white">{msg.sender[0]}</div>}<div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>{!isMe && <span className="text-[10px] text-gray-500 ml-1 mb-1">{msg.sender}</span>}<div className={`px-4 py-2 rounded-2xl shadow-sm text-sm break-words ${isMe ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-white text-gray-800 rounded-tl-none border'}`}>{msg.text}</div><span className="text-[10px] text-gray-400 mt-1 mx-1">{msg.time}</span></div></div></div>); })}</div>
       <div className="p-3 bg-white border-t flex items-center gap-2 pb-safe"><input type="text" className="flex-1 bg-gray-100 rounded-full px-5 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="พิมพ์ข้อความ..." value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && (onSendMessage(input), setInput(''))} /><button onClick={() => { if(input.trim()) { onSendMessage(input); setInput(''); }}} className={`p-3 rounded-full transition-all ${input.trim() ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-400'}`}><Send className="w-5 h-5"/></button></div>
     </div>
   );
 };
 
 const MyActivity = ({ user, posts, transactions }) => {
-  const myTrips = posts.filter(p => p.author === user.name || p.participants.includes(user.name));
+  const myTrips = posts.filter(p => p.author === user.name || (p.participants && p.participants.includes(user.name)));
   const myTrans = transactions.filter(t => t.from === user.name);
   return (
     <div className="space-y-6 animate-in fade-in">
-      <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2"><CalendarCheck className="w-8 h-8 text-purple-600"/> ประวัติและกิจกรรมของฉัน</h2>
+      <div className="flex items-center gap-3 mb-6">
+        <div className="bg-purple-100 p-3 rounded-xl"><CalendarCheck className="w-6 h-6 text-purple-600"/></div>
+        <div><h2 className="text-2xl font-bold text-gray-800">ข้อมูลการจองของฉัน</h2><p className="text-gray-500 text-sm">ประวัติการเดินทางและรายการชำระเงิน</p></div>
+      </div>
       <div className="grid md:grid-cols-2 gap-6">
-        <div><h3 className="font-bold text-lg mb-4 text-gray-700">ทริปที่เข้าร่วม/สร้าง ({myTrips.length})</h3>{myTrips.map(trip => (<div key={trip.id} className="bg-white p-4 rounded-xl border mb-3 shadow-sm flex gap-3"><div className="w-16 h-16 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">{trip.type==='video'?<div className="w-full h-full bg-black flex items-center justify-center"><Video className="text-white w-6 h-6"/></div>:<img src={trip.media} className="w-full h-full object-cover"/>}</div><div className="flex-1"><div className="font-bold line-clamp-1">{trip.title}</div><div className="text-xs text-gray-500 mb-1">{trip.date || 'ไม่ระบุ'} • {trip.location}</div><Badge status={trip.participants.includes(user.name) ? 'active' : 'pending'} /></div></div>))}</div>
-        <div><h3 className="font-bold text-lg mb-4 text-gray-700">ประวัติการชำระเงิน ({myTrans.length})</h3>{myTrans.map(t => (<div key={t.id} className="bg-white p-4 rounded-xl border mb-3 shadow-sm flex justify-between items-center"><div><div className="font-bold">฿{t.amount.toLocaleString()}</div><div className="text-xs text-gray-500">{t.date} → {t.to}</div></div><Badge status={t.status} /></div>))}</div>
+        <div className="space-y-4">
+            <h3 className="font-bold text-lg text-gray-700 border-l-4 border-blue-500 pl-3">ทริปที่เข้าร่วม</h3>
+            {myTrips.length > 0 ? myTrips.map(trip => (
+                <div key={trip.id} className="bg-white p-4 rounded-xl border shadow-sm flex gap-3 hover:shadow-md transition-shadow">
+                    <div className="w-20 h-20 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
+                        {trip.type==='video'?<div className="w-full h-full bg-black flex items-center justify-center"><Video className="text-white w-6 h-6"/></div>:<img src={trip.media} className="w-full h-full object-cover"/>}
+                    </div>
+                    <div className="flex-1 flex flex-col justify-between">
+                        <div><div className="font-bold line-clamp-1 text-gray-800">{trip.title}</div><div className="text-xs text-gray-500 flex items-center gap-1 mt-1"><MapPin className="w-3 h-3"/> {trip.location}</div></div>
+                        <div className="flex justify-between items-center mt-2"><div className="text-xs bg-gray-100 px-2 py-1 rounded text-gray-600">{trip.date}</div><Badge status={trip.participants.includes(user.name) ? 'active' : 'pending'} /></div>
+                    </div>
+                </div>
+            )) : <div className="text-gray-400 text-center py-8 border-2 border-dashed rounded-xl">ยังไม่มีทริปที่เข้าร่วม</div>}
+        </div>
+        <div className="space-y-4">
+            <h3 className="font-bold text-lg text-gray-700 border-l-4 border-green-500 pl-3">ประวัติการชำระเงิน</h3>
+            {myTrans.length > 0 ? myTrans.map(t => (
+                <div key={t.id} className="bg-white p-4 rounded-xl border shadow-sm flex justify-between items-center hover:shadow-md transition-shadow">
+                    <div><div className="font-bold text-lg text-gray-800">฿{t.amount.toLocaleString()}</div><div className="text-xs text-gray-500">{t.title || 'รายการชำระเงิน'}</div><div className="text-[10px] text-gray-400 mt-1">{t.date}</div></div><Badge status={t.status} />
+                </div>
+            )) : <div className="text-gray-400 text-center py-8 border-2 border-dashed rounded-xl">ไม่มีประวัติการชำระเงิน</div>}
+        </div>
       </div>
     </div>
   );
@@ -336,66 +340,62 @@ const AdminPanel = ({ users, transactions, services, onVerifyUser, onDeleteUser,
   const [tab, setTab] = useState('users');
   return (
     <div className="space-y-6">
-      <div className="flex gap-2 overflow-x-auto pb-2"><button onClick={() => setTab('users')} className={`px-4 py-2 rounded-full ${tab === 'users' ? 'bg-blue-600 text-white' : 'bg-white border'}`}>ลูกค้า</button><button onClick={() => setTab('verify')} className={`px-4 py-2 rounded-full ${tab === 'verify' ? 'bg-yellow-500 text-white' : 'bg-white border'}`}>คำขอสมัคร</button><button onClick={() => setTab('services')} className={`px-4 py-2 rounded-full ${tab === 'services' ? 'bg-indigo-500 text-white' : 'bg-white border'}`}>ตรวจสอบบริการ</button><button onClick={() => setTab('payments')} className={`px-4 py-2 rounded-full ${tab === 'payments' ? 'bg-green-600 text-white' : 'bg-white border'}`}>การเงิน</button></div>
-      {tab === 'users' && <div className="bg-white rounded-xl border overflow-hidden"><table className="w-full text-left text-sm"><thead className="bg-gray-50"><tr><th className="p-3">User</th><th className="p-3">Role</th><th className="p-3">Status</th><th className="p-3">Action</th></tr></thead><tbody className="divide-y">{users.map(u => (<tr key={u.id}><td className="p-3 flex items-center gap-2"><img src={u.image} className="w-6 h-6 rounded-full"/>{u.name}</td><td className="p-3 uppercase">{u.role}</td><td className="p-3"><Badge status={u.status}/></td><td className="p-3">{u.role!=='admin'&&<button onClick={()=>onDeleteUser(u.id)} className="text-red-500"><Trash2 className="w-4 h-4"/></button>}</td></tr>))}</tbody></table></div>}
-      {tab === 'verify' && <div className="space-y-4">{users.filter(u => u.status === 'pending').map(u => (<div key={u.id} className="bg-white p-4 border rounded-xl shadow-sm"><div className="font-bold mb-2">{u.name} ({u.role})</div><div className="text-sm bg-gray-50 p-2 rounded italic mb-3">"{u.verifyRequest}"</div><div className="flex gap-2"><Button onClick={() => onVerifyUser(u.id, 'rejected')} variant="danger" className="text-xs">ปัดตก</Button><Button onClick={() => onVerifyUser(u.id, 'verified')} variant="success" className="text-xs">อนุมัติ</Button></div></div>))}</div>}
-      {tab === 'services' && <div className="space-y-4">{services.filter(s => s.status === 'pending').length===0?<div className="text-center text-gray-400 py-4">ไม่มีรายการใหม่</div>:services.filter(s => s.status === 'pending').map(s => (<div key={s.id} className="bg-white p-4 border rounded-xl shadow-sm flex gap-4"><img src={s.image} className="w-24 h-24 rounded-lg object-cover"/><div className="flex-1"><div className="font-bold">{s.name}</div><div className="text-sm text-gray-500">โดย {s.owner} • {s.location}</div><div className="flex gap-2 mt-2"><Button onClick={() => onApproveService(s.id, 'rejected')} variant="danger" className="text-xs">ไม่อนุมัติ</Button><Button onClick={() => onApproveService(s.id, 'approved')} variant="success" className="text-xs">อนุมัติลงเว็บ</Button></div></div></div>))}</div>}
-      {tab === 'payments' && <div className="space-y-4">{transactions.filter(t => t.status === 'pending').map(t => (<div key={t.id} className="bg-white p-4 border rounded-xl shadow-sm"><div className="flex justify-between mb-2"><div><div className="font-bold text-blue-600">฿{t.amount}</div><div className="text-xs">{t.from}</div></div><div className="text-xs text-gray-500">{t.date}</div></div><Button onClick={() => onApprovePayment(t.id, t.from, t.postId)} variant="success" className="w-full text-xs">ยืนยันยอด</Button></div>))}</div>}
+      <div className="flex items-center gap-3 mb-6"><div className="bg-orange-100 p-3 rounded-xl"><Database className="w-6 h-6 text-orange-600"/></div><div><h2 className="text-2xl font-bold text-gray-800">Admin Dashboard</h2><p className="text-gray-500 text-sm">จัดการระบบและอนุมัติข้อมูล</p></div></div>
+      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+         <button onClick={() => setTab('users')} className={`px-5 py-2 rounded-full font-bold transition-all ${tab === 'users' ? 'bg-blue-600 text-white shadow-lg' : 'bg-white border text-gray-600 hover:bg-gray-50'}`}>สมาชิก ({users.length})</button>
+         <button onClick={() => setTab('verify')} className={`px-5 py-2 rounded-full font-bold transition-all ${tab === 'verify' ? 'bg-yellow-500 text-white shadow-lg' : 'bg-white border text-gray-600 hover:bg-gray-50'}`}>รออนุมัติ ({users.filter(u=>u.status==='pending').length})</button>
+         <button onClick={() => setTab('services')} className={`px-5 py-2 rounded-full font-bold transition-all ${tab === 'services' ? 'bg-indigo-500 text-white shadow-lg' : 'bg-white border text-gray-600 hover:bg-gray-50'}`}>บริการ ({services.length})</button>
+         <button onClick={() => setTab('payments')} className={`px-5 py-2 rounded-full font-bold transition-all ${tab === 'payments' ? 'bg-green-600 text-white shadow-lg' : 'bg-white border text-gray-600 hover:bg-gray-50'}`}>การเงิน ({transactions.length})</button>
+      </div>
+      <div className="bg-white rounded-2xl shadow-sm border overflow-hidden">
+        {tab === 'users' && <div className="overflow-x-auto"><table className="w-full text-left text-sm"><thead className="bg-gray-50 text-gray-600"><tr><th className="p-4">User</th><th className="p-4">Role</th><th className="p-4">Status</th><th className="p-4 text-right">Action</th></tr></thead><tbody className="divide-y">{users.map(u => (<tr key={u.id} className="hover:bg-gray-50"><td className="p-4 flex items-center gap-3"><img src={u.image||"https://ui-avatars.com/api/?name="+u.name} className="w-8 h-8 rounded-full bg-gray-200"/> <span className="font-bold">{u.name}</span></td><td className="p-4"><span className="bg-gray-100 px-2 py-1 rounded text-xs uppercase font-bold">{u.role}</span></td><td className="p-4"><Badge status={u.status}/></td><td className="p-4 text-right">{u.role!=='admin'&&<button onClick={()=>onDeleteUser('users', u.id)} className="text-red-500 hover:bg-red-50 p-2 rounded-full"><Trash2 className="w-4 h-4"/></button>}</td></tr>))}</tbody></table></div>}
+        {tab === 'verify' && <div className="divide-y">{users.filter(u => u.status === 'pending').length === 0 ? <div className="p-8 text-center text-gray-400">ไม่มีรายการรออนุมัติ</div> : users.filter(u => u.status === 'pending').map(u => (<div key={u.id} className="p-4 flex justify-between items-center hover:bg-gray-50"><div><div className="font-bold text-lg">{u.name}</div><div className="text-sm text-gray-500">{u.role.toUpperCase()} • {u.verifyRequest}</div></div><div className="flex gap-2"><Button onClick={() => onVerifyUser(u.id, 'rejected')} variant="danger" className="text-xs">ปัดตก</Button><Button onClick={() => onVerifyUser(u.id, 'verified')} variant="success" className="text-xs">อนุมัติ</Button></div></div>))}</div>}
+        {tab === 'services' && <div className="divide-y">{services.filter(s => s.status === 'pending').length===0?<div className="p-8 text-center text-gray-400">ไม่มีบริการใหม่</div>:services.filter(s => s.status === 'pending').map(s => (<div key={s.id} className="p-4 flex gap-4 hover:bg-gray-50"><img src={s.image} className="w-24 h-24 rounded-lg object-cover bg-gray-200"/><div className="flex-1"> <div className="font-bold text-lg">{s.name}</div><div className="text-sm text-gray-500 mb-2">โดย {s.owner} • {s.location}</div><div className="flex gap-2"><Button onClick={() => onApproveService(s.id, 'rejected')} variant="danger" className="text-xs">ไม่อนุมัติ</Button><Button onClick={() => onApproveService(s.id, 'approved')} variant="success" className="text-xs">อนุมัติลงเว็บ</Button></div></div></div>))}</div>}
+        {tab === 'payments' && <div className="divide-y">{transactions.filter(t => t.status === 'pending').length===0?<div className="p-8 text-center text-gray-400">ไม่มีรายการโอนเงิน</div>:transactions.filter(t => t.status === 'pending').map(t => (<div key={t.id} className="p-4 flex justify-between items-center hover:bg-gray-50"><div><div className="font-bold text-blue-600 text-lg">฿{t.amount.toLocaleString()}</div><div className="text-sm text-gray-600">จาก {t.from}</div><div className="text-xs text-gray-400">{t.date}</div></div><Button onClick={() => onApprovePayment(t.id, t.from, t.postId)} variant="success" className="w-full text-xs">ยืนยันยอด</Button></div>))}</div>}
+      </div>
     </div>
   );
 };
 
 const BusinessDashboard = ({ user, services, onCreateService }) => (
   <div className="space-y-6">
-    <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2"><Briefcase className="text-blue-600"/> จัดการธุรกิจ</h2>
-        <p className="text-gray-500">จัดการข้อมูลที่พัก หรือบริการรถเช่า</p>
-      </div>
-      <Button onClick={onCreateService}><PlusCircle className="w-4 h-4"/> เพิ่มรายการใหม่</Button>
-    </div>
-    <div className="grid md:grid-cols-3 gap-6">
-      {services.filter(s => s.owner === user.name).map(s => (
-        <div key={s.id} className="bg-white p-4 rounded-xl border relative">
-           <div className="absolute top-4 right-4"><Badge status={s.status}/></div>
-           <img src={s.image} className="w-full h-32 object-cover rounded-lg mb-3 bg-gray-100" />
-           <h4 className="font-bold text-lg">{s.name}</h4>
-           <div className="flex justify-between text-sm text-gray-500 mt-2">
-             <span>{s.location}</span>
-             <span className="font-bold text-blue-600">฿{s.price.toLocaleString()}</span>
-           </div>
-        </div>
-      ))}
-      {services.filter(s => s.owner === user.name).length === 0 && <div className="col-span-3 text-center py-10 text-gray-400 border-2 border-dashed rounded-xl">ไม่มีรายการบริการ</div>}
-    </div>
+    <div className="flex justify-between items-center bg-gradient-to-r from-indigo-600 to-purple-600 p-6 rounded-2xl shadow-lg text-white"><div><h2 className="text-2xl font-bold flex items-center gap-2"><Briefcase/> จัดการธุรกิจ</h2><p className="opacity-80">จัดการข้อมูลที่พัก หรือบริการรถเช่าของคุณ</p></div><button onClick={onCreateService} className="bg-white text-indigo-600 px-4 py-2 rounded-xl font-bold flex items-center gap-2 hover:bg-gray-100 transition-colors"><PlusCircle className="w-5 h-5"/> เพิ่มรายการใหม่</button></div>
+    {services.filter(s => s.owner === user.name).length === 0 ? <div className="text-center py-12 border-2 border-dashed rounded-2xl text-gray-400">คุณยังไม่มีรายการบริการ สร้างเลยเพื่อเริ่มรับลูกค้า!</div> : <div className="grid md:grid-cols-3 gap-6">{services.filter(s => s.owner === user.name).map(s => (<div key={s.id} className="bg-white p-4 rounded-xl border shadow-sm relative group hover:shadow-md transition-all"><div className="absolute top-4 right-4 z-10"><Badge status={s.status}/></div><img src={s.image} className="w-full h-40 object-cover rounded-lg mb-3 bg-gray-100" /><h4 className="font-bold text-lg text-gray-800">{s.name}</h4><div className="flex justify-between text-sm text-gray-500 mt-2 border-t pt-2"><span className="flex items-center gap-1"><MapPin className="w-3 h-3"/> {s.location}</span><span className="font-bold text-blue-600">฿{s.price.toLocaleString()}</span></div></div>))}</div>}
   </div>
 );
 
-const ServiceMarketplace = ({ services, onBook }) => (
-  <div className="space-y-6">
-    <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-8 rounded-2xl text-white shadow-lg mb-6">
-      <h2 className="text-3xl font-bold mb-2 flex items-center gap-2"><Tag className="w-8 h-8"/> จองที่พัก & การเดินทาง</h2>
-      <p className="text-indigo-100">รวมดีลเด็ดจากผู้ประกอบการท้องถิ่นทั่วไทย</p>
+// Updated ServiceMarketplace with Tabs
+const ServiceMarketplace = ({ services, onBook }) => {
+  const [category, setCategory] = useState('all'); // all, accommodation, transport
+  const filteredServices = services.filter(s => s.status === 'approved' && (category === 'all' || s.type === category));
+
+  return (
+    <div className="space-y-8 animate-in fade-in">
+      <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-8 rounded-2xl text-white shadow-lg mb-6 relative overflow-hidden"><div className="absolute top-0 right-0 w-40 h-40 bg-white opacity-10 rounded-full -mr-10 -mt-10"></div><h2 className="text-3xl font-bold mb-2 flex items-center gap-2 relative z-10"><Tag className="w-8 h-8"/> จองที่พัก & การเดินทาง</h2><p className="text-indigo-100 relative z-10">รวมดีลเด็ดจากผู้ประกอบการท้องถิ่นทั่วไทย ที่ผ่านการรับรองแล้ว</p></div>
+      
+      {/* Category Tabs */}
+      <div className="flex gap-2 overflow-x-auto pb-2">
+         <button onClick={() => setCategory('all')} className={`px-6 py-2 rounded-full font-bold transition-all ${category === 'all' ? 'bg-indigo-600 text-white shadow-lg' : 'bg-white border text-gray-600 hover:bg-gray-50'}`}>ทั้งหมด</button>
+         <button onClick={() => setCategory('accommodation')} className={`px-6 py-2 rounded-full font-bold transition-all flex items-center gap-2 ${category === 'accommodation' ? 'bg-blue-600 text-white shadow-lg' : 'bg-white border text-gray-600 hover:bg-gray-50'}`}><Building className="w-4 h-4"/> ที่พัก</button>
+         <button onClick={() => setCategory('transport')} className={`px-6 py-2 rounded-full font-bold transition-all flex items-center gap-2 ${category === 'transport' ? 'bg-orange-500 text-white shadow-lg' : 'bg-white border text-gray-600 hover:bg-gray-50'}`}><Bus className="w-4 h-4"/> รถเช่า</button>
+      </div>
+
+      <div className="grid md:grid-cols-4 gap-4">
+        {filteredServices.length > 0 ? filteredServices.map(s => <ServiceCard key={s.id} service={s} onBook={onBook}/>) : <div className="col-span-4 text-center py-10 text-gray-400 border-2 border-dashed rounded-xl">ไม่พบรายการในหมวดหมู่นี้</div>}
+      </div>
     </div>
-    <h3 className="font-bold text-xl text-gray-800 flex items-center gap-2"><Building className="w-5 h-5 text-blue-500"/> ที่พัก (Accommodation)</h3>
-    <div className="grid md:grid-cols-4 gap-4">
-      {services.filter(s => s.status === 'approved' && s.type === 'accommodation').map(s => <ServiceCard key={s.id} service={s} onBook={onBook}/>)}
-    </div>
-    <h3 className="font-bold text-xl text-gray-800 flex items-center gap-2 mt-8"><Bus className="w-5 h-5 text-orange-500"/> รถเช่า (Transport)</h3>
-    <div className="grid md:grid-cols-4 gap-4">
-      {services.filter(s => s.status === 'approved' && s.type === 'transport').map(s => <ServiceCard key={s.id} service={s} onBook={onBook}/>)}
-    </div>
-  </div>
-);
+  );
+};
 
 const AuthScreen = ({ view, setView, loginForm, setLoginForm, regForm, setRegForm, handleLogin, handleRegister, notification }) => (
-  <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-    <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
-      <div className="text-center mb-6"><div className="inline-block mb-2"><Logo className="w-20 h-20 drop-shadow-md"/></div><h1 className="text-2xl font-bold text-gray-800">TripbuddyTH</h1></div>
+  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+    <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md animate-in zoom-in duration-300">
+      <div className="text-center mb-8"><div className="inline-flex items-center justify-center p-4 bg-blue-50 rounded-full mb-4 shadow-sm"><Logo className="w-16 h-16 drop-shadow-md"/></div><h1 className="text-2xl font-bold text-gray-800">TripbuddyTH</h1><p className="text-gray-500 text-sm mt-1">เพื่อนร่วมทาง ที่รู้ใจคุณ</p></div>
+      {notification && <div className={`p-3 rounded-lg text-sm flex items-center gap-2 mb-4 animate-in fade-in ${notification.type === 'error' ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-green-50 text-green-600 border border-green-100'}`}>{notification.type === 'error' ? <AlertCircle className="w-4 h-4"/> : <CheckCircle className="w-4 h-4"/>} {notification.message}</div>}
       {view === 'login' ? (
-        <form onSubmit={handleLogin} className="space-y-4"><input required placeholder="ชื่อผู้ใช้" className="w-full border p-3 rounded-lg" value={loginForm.username} onChange={e => setLoginForm({...loginForm, username: e.target.value})} /><input required type="password" placeholder="รหัสผ่าน" className="w-full border p-3 rounded-lg" value={loginForm.password} onChange={e => setLoginForm({...loginForm, password: e.target.value})} /><Button type="submit" className="w-full py-3">เข้าสู่ระบบ</Button><div className="text-center text-sm text-gray-500 mt-2">ยังไม่มีบัญชี? <span className="text-blue-600 cursor-pointer font-bold" onClick={() => setView('register')}>สมัครสมาชิก</span></div></form>
+        <form onSubmit={handleLogin} className="space-y-4"><div><label className="text-xs font-bold text-gray-500 mb-1 block">ชื่อผู้ใช้</label><input required className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all" value={loginForm.username} onChange={e => setLoginForm({...loginForm, username: e.target.value})} /></div><div><label className="text-xs font-bold text-gray-500 mb-1 block">รหัสผ่าน</label><input required type="password" className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all" value={loginForm.password} onChange={e => setLoginForm({...loginForm, password: e.target.value})} /></div><button type="submit" className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all transform active:scale-95">เข้าสู่ระบบ</button><div className="text-center text-sm text-gray-500 mt-4">ยังไม่มีบัญชี? <span className="text-blue-600 cursor-pointer font-bold hover:underline" onClick={() => setView('register')}>สมัครสมาชิก</span></div></form>
       ) : (
-        <form onSubmit={handleRegister} className="space-y-4">{notification && <div className={`p-3 rounded-lg text-sm flex items-center gap-2 ${notification.type === 'error' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}`}>{notification.message}</div>}<input required placeholder="ชื่อผู้ใช้" className="w-full border p-3 rounded-lg" value={regForm.username || ''} onChange={e => setRegForm({...regForm, username: e.target.value})} /><div className="grid grid-cols-2 gap-3"><input required type="password" placeholder="รหัสผ่าน" className="w-full border p-3 rounded-lg" value={regForm.password || ''} onChange={e => setRegForm({...regForm, password: e.target.value})} /><input required type="password" placeholder="ยืนยันรหัส" className="w-full border p-3 rounded-lg" value={regForm.confirmPassword || ''} onChange={e => setRegForm({...regForm, confirmPassword: e.target.value})} /></div><input required placeholder="ชื่อที่แสดง" className="w-full border p-3 rounded-lg" value={regForm.name || ''} onChange={e => setRegForm({...regForm, name: e.target.value})} /><div className="flex gap-2"><button type="button" onClick={() => setRegForm({...regForm, role: 'traveler'})} className={`flex-1 py-3 border rounded-lg text-sm flex flex-col items-center justify-center ${regForm.role === 'traveler' ? 'bg-blue-50 border-blue-500 text-blue-700' : ''}`}><User className="w-4 h-4"/> นักเดินทาง</button><button type="button" onClick={() => setRegForm({...regForm, role: 'guide'})} className={`flex-1 py-3 border rounded-lg text-sm flex flex-col items-center justify-center ${regForm.role === 'guide' ? 'bg-green-50 border-green-500 text-green-700' : ''}`}><Map className="w-4 h-4"/> ไกด์</button><button type="button" onClick={() => setRegForm({...regForm, role: 'business'})} className={`flex-1 py-3 border rounded-lg text-sm flex flex-col items-center justify-center ${regForm.role === 'business' ? 'bg-indigo-50 border-indigo-500 text-indigo-700' : ''}`}><Briefcase className="w-4 h-4"/> ผู้ประกอบการ</button></div><Button type="submit" className="w-full py-3">สมัครสมาชิก</Button><div className="text-center text-sm text-gray-500 mt-2">มีบัญชีแล้ว? <span className="text-blue-600 cursor-pointer font-bold" onClick={() => setView('login')}>เข้าสู่ระบบ</span></div></form>
+        <form onSubmit={handleRegister} className="space-y-3"><input required placeholder="ชื่อผู้ใช้" className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" value={regForm.username || ''} onChange={e => setRegForm({...regForm, username: e.target.value})} /><div className="grid grid-cols-2 gap-3"><input required type="password" placeholder="รหัสผ่าน" className="w-full border p-3 rounded-lg" value={regForm.password || ''} onChange={e => setRegForm({...regForm, password: e.target.value})} /><input required type="password" placeholder="ยืนยันรหัส" className="w-full border p-3 rounded-lg" value={regForm.confirmPassword || ''} onChange={e => setRegForm({...regForm, confirmPassword: e.target.value})} /></div><input required placeholder="ชื่อที่แสดง (Display Name)" className="w-full border p-3 rounded-lg" value={regForm.name || ''} onChange={e => setRegForm({...regForm, name: e.target.value})} /><div className="flex gap-2"><button type="button" onClick={() => setRegForm({...regForm, role: 'traveler'})} className={`flex-1 py-3 border rounded-lg text-xs flex flex-col items-center justify-center transition-all ${regForm.role === 'traveler' ? 'bg-blue-50 border-blue-500 text-blue-700 font-bold' : 'text-gray-500 hover:bg-gray-50'}`}><User className="w-4 h-4 mb-1"/> นักเดินทาง</button><button type="button" onClick={() => setRegForm({...regForm, role: 'guide'})} className={`flex-1 py-3 border rounded-lg text-xs flex flex-col items-center justify-center transition-all ${regForm.role === 'guide' ? 'bg-green-50 border-green-500 text-green-700 font-bold' : 'text-gray-500 hover:bg-gray-50'}`}><Map className="w-4 h-4 mb-1"/> ไกด์</button><button type="button" onClick={() => setRegForm({...regForm, role: 'business'})} className={`flex-1 py-3 border rounded-lg text-xs flex flex-col items-center justify-center transition-all ${regForm.role === 'business' ? 'bg-indigo-50 border-indigo-500 text-indigo-700 font-bold' : 'text-gray-500 hover:bg-gray-50'}`}><Briefcase className="w-4 h-4 mb-1"/> ธุรกิจ</button></div><button type="submit" className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all">สมัครสมาชิก</button><div className="text-center text-sm text-gray-500 mt-2">มีบัญชีแล้ว? <span className="text-blue-600 cursor-pointer font-bold hover:underline" onClick={() => setView('login')}>เข้าสู่ระบบ</span></div></form>
       )}
     </div>
   </div>
@@ -405,14 +405,15 @@ const ProfileModal = ({ user, onClose, onSave }) => {
   const [tab, setTab] = useState('info');
   const [formData, setFormData] = useState({ ...user });
   const [verifyText, setVerifyText] = useState(user.verifyRequest || '');
-  const handleVerifySubmit = () => { if(!verifyText.trim()) return alert("กรอกข้อมูลให้ครบ"); onSave({ ...formData, verifyRequest: verifyText, status: 'pending' }); alert("ส่งตรวจสอบแล้ว"); };
   return (
     <div className="space-y-4">
-      <div className="flex gap-2 p-1 bg-gray-100 rounded-lg mb-4"><button onClick={() => setTab('info')} className={`flex-1 py-1.5 text-sm font-bold rounded-md ${tab === 'info' ? 'bg-white shadow text-blue-600' : 'text-gray-500'}`}>ข้อมูลส่วนตัว</button><button onClick={() => setTab('verify')} className={`flex-1 py-1.5 text-sm font-bold rounded-md ${tab === 'verify' ? 'bg-white shadow text-green-600' : 'text-gray-500'}`}>ยืนยันตัวตน</button></div>
+      <div className="flex gap-2 p-1 bg-gray-100 rounded-lg mb-4"><button onClick={() => setTab('info')} className={`flex-1 py-2 text-sm font-bold rounded-md transition-all ${tab === 'info' ? 'bg-white shadow text-blue-600' : 'text-gray-500'}`}>ข้อมูลส่วนตัว</button><button onClick={() => setTab('verify')} className={`flex-1 py-2 text-sm font-bold rounded-md transition-all ${tab === 'verify' ? 'bg-white shadow text-green-600' : 'text-gray-500'}`}>ยืนยันตัวตน</button></div>
       {tab === 'info' ? (
-        <div className="space-y-3"><div className="flex justify-center mb-4"><div className="w-24 h-24 rounded-full bg-gray-200 overflow-hidden border-4 border-white shadow-md"><img src={formData.image || "https://ui-avatars.com/api/?name="+formData.name} className="w-full h-full object-cover"/></div></div><input className="w-full border p-2 rounded-lg" value={formData.name || ''} onChange={e => setFormData({...formData, name: e.target.value})} /><input className="w-full border p-2 rounded-lg" value={formData.image || ''} onChange={e => setFormData({...formData, image: e.target.value})} placeholder="URL รูป" /><textarea className="w-full border p-2 rounded-lg h-20" value={formData.bio || ''} onChange={e => setFormData({...formData, bio: e.target.value})} /><input className="w-full border p-2 rounded-lg" value={formData.contact || ''} onChange={e => setFormData({...formData, contact: e.target.value})} placeholder="ติดต่อ" /><Button onClick={() => onSave(formData)} className="w-full mt-4">บันทึก</Button></div>
+        <div className="space-y-4"><div className="flex justify-center mb-2"><div className="w-24 h-24 rounded-full bg-gray-200 overflow-hidden border-4 border-white shadow-md relative group"><img src={formData.image || "https://ui-avatars.com/api/?name="+formData.name} className="w-full h-full object-cover"/><div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"><Edit className="text-white"/></div></div></div><div className="space-y-2"><div><label className="text-xs font-bold text-gray-500">ชื่อที่แสดง</label><input className="w-full border p-2 rounded-lg" value={formData.name || ''} onChange={e => setFormData({...formData, name: e.target.value})} /></div>
+        <FileUploader label="เปลี่ยนรูปโปรไฟล์" type="image" onUpload={(url) => setFormData({...formData, image: url})} />
+        <div><label className="text-xs font-bold text-gray-500">ข้อมูลติดต่อ</label><input className="w-full border p-2 rounded-lg" value={formData.contact || ''} onChange={e => setFormData({...formData, contact: e.target.value})} placeholder="Line / Tel" /></div></div><Button onClick={() => onSave(formData)} className="w-full mt-2">บันทึกการเปลี่ยนแปลง</Button></div>
       ) : (
-        <div className="text-center space-y-4">{formData.status === 'verified' ? <div className="text-green-600 py-6"><ShieldCheck className="w-16 h-16 mx-auto mb-2"/><h3>ยืนยันแล้ว</h3></div> : formData.status === 'pending' ? <div className="text-yellow-600 py-6"><Loader className="w-16 h-16 mx-auto mb-2 animate-spin"/><h3>รอตรวจสอบ</h3></div> : <><textarea className="w-full border p-3 rounded-lg h-32" placeholder="พิมพ์ประวัติ..." value={verifyText} onChange={e => setVerifyText(e.target.value)} /><Button onClick={handleVerifySubmit} variant="success" className="w-full">ส่งตรวจสอบ</Button></>}</div>
+        <div className="text-center space-y-4 py-4">{formData.status === 'verified' ? <div className="text-green-600 py-6 animate-in zoom-in"><ShieldCheck className="w-20 h-20 mx-auto mb-4"/><h3 className="font-bold text-xl">ยืนยันตัวตนแล้ว</h3><p className="text-sm opacity-80">บัญชีของคุณปลอดภัยและน่าเชื่อถือ</p></div> : formData.status === 'pending' ? <div className="text-yellow-600 py-6 animate-in zoom-in"><Loader className="w-20 h-20 mx-auto mb-4 animate-spin"/><h3 className="font-bold text-xl">รอการตรวจสอบ</h3><p className="text-sm opacity-80">แอดมินกำลังตรวจสอบข้อมูลของคุณ</p></div> : <><div className="bg-blue-50 p-4 rounded-xl text-left text-sm text-gray-600 mb-4">การยืนยันตัวตนช่วยเพิ่มความน่าเชื่อถือให้กับบัญชีของคุณ โปรดกรอกรายละเอียดเกี่ยวกับตัวคุณหรือธุรกิจของคุณ</div><textarea className="w-full border p-3 rounded-lg h-32 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="พิมพ์รายละเอียดเพื่อยืนยันตัวตน..." value={verifyText} onChange={e => setVerifyText(e.target.value)} /><Button onClick={() => { onSave({ ...formData, verifyRequest: verifyText, status: 'pending' }); alert('ส่งคำขอแล้ว'); }} variant="success" className="w-full">ส่งตรวจสอบ</Button></>}</div>
       )}
     </div>
   );
@@ -423,10 +424,10 @@ const ThailandDiscovery = () => {
   const [selectedProv, setSelectedProv] = useState(null);
   return (
     <div className="space-y-6 animate-in slide-in-from-bottom duration-300">
-      <div className="bg-gradient-to-r from-teal-500 to-emerald-600 rounded-2xl p-8 text-white text-center shadow-lg"><h2 className="text-3xl font-bold mb-2 flex items-center justify-center gap-2"><Map className="w-8 h-8"/> 77 จังหวัดทั่วไทย</h2></div>
-      <div className="flex flex-wrap gap-2 justify-center">{Object.keys(THAILAND_DATA).map(key => (<button key={key} onClick={() => setActiveRegion(key)} className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${activeRegion === key ? 'bg-blue-600 text-white shadow-md' : 'bg-white text-gray-600 border'}`}>{THAILAND_DATA[key].name}</button>))}</div>
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">{THAILAND_DATA[activeRegion].provinces.map((prov, idx) => (<div key={idx} onClick={() => setSelectedProv(prov)} className={`cursor-pointer rounded-xl p-4 border bg-white hover:shadow-lg transition-all`}><div className="font-bold">{prov.name}</div><div className="text-xs opacity-70"><Star className="w-3 h-3 inline"/> {prov.highlight}</div></div>))}</div>
-      {selectedProv && <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setSelectedProv(null)}><div className="bg-white rounded-2xl w-full max-w-sm p-6 relative animate-in zoom-in" onClick={e => e.stopPropagation()}><button onClick={() => setSelectedProv(null)} className="absolute top-4 right-4 text-gray-400"><XCircle/></button><div className="text-center"><div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold text-blue-600">{selectedProv.name[0]}</div><h3 className="text-2xl font-bold mb-2">{selectedProv.name}</h3><div className="inline-block bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-bold mb-4">⭐ {selectedProv.highlight}</div><p className="text-gray-600">{selectedProv.desc}</p><Button className="w-full mt-6" onClick={() => window.open(`https://www.google.com/search?q=ที่เที่ยว${selectedProv.name}`, '_blank')}>ค้นหาข้อมูล</Button></div></div></div>}
+      <div className="bg-gradient-to-r from-teal-500 to-emerald-600 rounded-2xl p-8 text-white text-center shadow-lg relative overflow-hidden"><div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-16 -mt-16"></div><h2 className="text-3xl font-bold mb-2 flex items-center justify-center gap-2 relative z-10"><Map className="w-8 h-8"/> 77 จังหวัดทั่วไทย</h2><p className="text-teal-100 relative z-10">ค้นหาข้อมูลท่องเที่ยว จุดเช็คอิน และของดีประจำจังหวัด</p></div>
+      <div className="flex flex-wrap gap-2 justify-center sticky top-20 z-30 bg-[#F8F9FA] py-2">{Object.keys(THAILAND_DATA).map(key => (<button key={key} onClick={() => setActiveRegion(key)} className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${activeRegion === key ? 'bg-teal-600 text-white shadow-md transform scale-105' : 'bg-white text-gray-600 border hover:bg-gray-50'}`}>{THAILAND_DATA[key].name}</button>))}</div>
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">{THAILAND_DATA[activeRegion].provinces.map((prov, idx) => (<div key={idx} onClick={() => setSelectedProv(prov)} className={`cursor-pointer rounded-xl p-4 border bg-white hover:shadow-lg transition-all hover:-translate-y-1 group`}><div className="font-bold text-gray-800 group-hover:text-teal-600 transition-colors">{prov.name}</div><div className="text-xs text-gray-500 mt-2 flex items-center gap-1"><Star className="w-3 h-3 text-yellow-400 fill-yellow-400"/> {prov.highlight}</div></div>))}</div>
+      {selectedProv && <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setSelectedProv(null)}><div className="bg-white rounded-2xl w-full max-w-sm p-6 relative animate-in zoom-in shadow-2xl" onClick={e => e.stopPropagation()}><button onClick={() => setSelectedProv(null)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><XCircle/></button><div className="text-center"><div className="w-20 h-20 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl font-bold text-teal-600 border-4 border-white shadow">{selectedProv.name[0]}</div><h3 className="text-2xl font-bold mb-2 text-gray-800">{selectedProv.name}</h3><div className="inline-block bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-bold mb-6">⭐ {selectedProv.highlight}</div><p className="text-gray-600 mb-8 bg-gray-50 p-4 rounded-xl text-sm">{selectedProv.desc}</p><Button className="w-full shadow-lg shadow-blue-200" onClick={() => window.open(`https://www.google.com/search?q=ที่เที่ยว${selectedProv.name}`, '_blank')}>ค้นหาข้อมูลเพิ่มเติมบน Google</Button></div></div></div>}
     </div>
   );
 };
@@ -448,27 +449,34 @@ export default function App() {
   const [regForm, setRegForm] = useState({ username: '', name: '', role: 'traveler', password: '', confirmPassword: '' });
   const [notification, setNotification] = useState(null);
 
-  // Persistence V25
+  // Persistence V29 (Demo - LocalStorage)
   useEffect(() => {
-    const s = localStorage.getItem('tb_session_v25'); if (s) setCurrentUser(JSON.parse(s));
-    const u = localStorage.getItem('tb_users_v25'); if (u) setDbUsers(JSON.parse(u));
-    const p = localStorage.getItem('tb_posts_v25'); if (p) setPosts(JSON.parse(p));
-    const sv = localStorage.getItem('tb_services_v25'); if (sv) setServices(JSON.parse(sv));
-    const t = localStorage.getItem('tb_trans_v25'); if (t) setTransactions(JSON.parse(t));
+    const s = localStorage.getItem('tb_session_v29'); if (s) setCurrentUser(JSON.parse(s));
+    const u = localStorage.getItem('tb_users_v29'); if (u) setDbUsers(JSON.parse(u));
+    const p = localStorage.getItem('tb_posts_v29'); if (p) setPosts(JSON.parse(p));
+    const sv = localStorage.getItem('tb_services_v29'); if (sv) setServices(JSON.parse(sv));
+    const t = localStorage.getItem('tb_trans_v29'); if (t) setTransactions(JSON.parse(t));
   }, []);
-  useEffect(() => { localStorage.setItem('tb_users_v25', JSON.stringify(dbUsers)); }, [dbUsers]);
-  useEffect(() => { localStorage.setItem('tb_posts_v25', JSON.stringify(posts)); }, [posts]);
-  useEffect(() => { localStorage.setItem('tb_services_v25', JSON.stringify(services)); }, [services]);
-  useEffect(() => { localStorage.setItem('tb_trans_v25', JSON.stringify(transactions)); }, [transactions]);
-  useEffect(() => { if (currentUser) { localStorage.setItem('tb_session_v25', JSON.stringify(currentUser)); if(view==='landing') setView(currentUser.role==='admin'?'admin':currentUser.role==='business'?'business_dash':'dashboard'); } else { localStorage.removeItem('tb_session_v25'); } }, [currentUser]);
+  useEffect(() => { localStorage.setItem('tb_users_v29', JSON.stringify(dbUsers)); }, [dbUsers]);
+  useEffect(() => { localStorage.setItem('tb_posts_v29', JSON.stringify(posts)); }, [posts]);
+  useEffect(() => { localStorage.setItem('tb_services_v29', JSON.stringify(services)); }, [services]);
+  useEffect(() => { localStorage.setItem('tb_trans_v29', JSON.stringify(transactions)); }, [transactions]);
+  useEffect(() => { if (currentUser) { localStorage.setItem('tb_session_v29', JSON.stringify(currentUser)); if(view==='landing') setView(currentUser.role==='admin'?'admin':currentUser.role==='business'?'business_dash':'dashboard'); } else { localStorage.removeItem('tb_session_v29'); } }, [currentUser]);
 
   // Handlers
-  const handleLogin = (e) => { e.preventDefault(); const u = dbUsers.find(x => x.username === loginForm.username && x.password === loginForm.password); if (u) setCurrentUser(u); else alert('ผิดพลาด'); };
-  const handleRegister = (e) => { e.preventDefault(); if (regForm.password !== regForm.confirmPassword) return setNotification({message:'รหัสไม่ตรง',type:'error'}); setDbUsers([...dbUsers, { ...regForm, id: Date.now(), status: regForm.role==='traveler'?'verified':'pending', joinedAt: new Date().toLocaleDateString() }]); setNotification({message:'สำเร็จ!',type:'success'}); setTimeout(()=>setView('login'),1500); };
+  const handleLogin = (e) => { e.preventDefault(); const u = dbUsers.find(x => x.username === loginForm.username && x.password === loginForm.password); if (u) {setCurrentUser(u); setView(u.role==='admin'?'admin':u.role==='business'?'business_dash':'dashboard');} else alert('ผิดพลาด'); };
+  const handleRegister = async (e) => { e.preventDefault(); if (regForm.password !== regForm.confirmPassword) return setNotification({message:'รหัสไม่ตรง',type:'error'}); 
+    const newUser = { ...regForm, id: Date.now(), status: regForm.role==='traveler'?'verified':'pending', joinedAt: new Date().toLocaleDateString(), image:'', contact:'' };
+    setDbUsers([...dbUsers, newUser]);
+    setNotification({message:'สำเร็จ!',type:'success'}); setTimeout(()=>setView('login'),1500); 
+  };
   const handleLogout = () => { setCurrentUser(null); setView('landing'); };
+  
   const createService = () => { setServices([...services, {...newItem, id: Date.now(), owner: currentUser.name, status: 'pending'}]); setModal({open: false}); };
   const createPost = () => { setPosts([{...newItem, id: Date.now(), author: currentUser.name, chat: [], likes: 0, participants: [], type: 'trip' }, ...posts]); setModal({open: false}); };
+  
   const verifyUser = (id, status) => { setDbUsers(dbUsers.map(u => u.id === id ? { ...u, status } : u)); };
+  const onDeleteUser = (type, id) => { if(confirm('ลบ?')) setDbUsers(dbUsers.filter(u => u.id !== id)); };
   const approveService = (id, status) => { setServices(services.map(s => s.id === id ? { ...s, status } : s)); };
   
   const handleJoin = (post) => {
@@ -477,23 +485,32 @@ export default function App() {
     const updated = posts.map(p => p.id === post.id ? { ...p, participants: [...p.participants, currentUser.name] } : p);
     setPosts(updated); setActiveTripDetail({ ...post, participants: [...post.participants, currentUser.name] });
   };
+  
   const handleApprovePayment = (tid, userName, pid) => {
     setTransactions(transactions.map(t => t.id === tid ? { ...t, status: 'approved' } : t));
-    if(pid) setPosts(posts.map(p => p.id === pid ? { ...p, participants: [...p.participants, userName] } : p));
+    if(pid) {
+       const post = posts.find(p => p.id === pid);
+       if(post) {
+         const updated = posts.map(p => p.id === pid ? { ...p, participants: [...p.participants, userName] } : p);
+         setPosts(updated);
+       }
+    }
   };
+  
   const createPayment = () => {
     const newTrans = { 
        id: Date.now(), from: currentUser.name, to: modal.data.owner || modal.data.author, 
-       amount: modal.data.price, date: new Date().toLocaleDateString(), status: 'pending', slip: 'https://via.placeholder.com/150', itemId: modal.data.id
+       amount: modal.data.price, date: new Date().toLocaleDateString(), status: 'pending', slip: 'https://via.placeholder.com/150', itemId: modal.data.id, title: modal.data.title || modal.data.name
     };
     setTransactions([...transactions, newTrans]); setModal({open: false}); alert("แจ้งโอนสำเร็จ!");
   };
+
   const handleServiceUpload = (url) => {
     setNewItem({ ...newItem, image: url });
   }
 
   const renderView = () => {
-    if (view === 'admin') return <AdminPanel users={dbUsers} services={services} transactions={transactions} onVerifyUser={verifyUser} onDeleteUser={(id)=>setDbUsers(dbUsers.filter(u=>u.id!==id))} onApprovePayment={handleApprovePayment} onApproveService={approveService} />;
+    if (view === 'admin') return <AdminPanel users={dbUsers} services={services} transactions={transactions} onVerifyUser={verifyUser} onDeleteUser={onDeleteUser} onApprovePayment={handleApprovePayment} onApproveService={approveService} />;
     if (view === 'business_dash') return <BusinessDashboard user={currentUser} services={services} onCreateService={()=>{setModal({open:true, type:'create_service'}); setNewItem({});}} />;
     if (view === 'services') return <ServiceMarketplace services={services} onBook={(s) => setModal({open: true, type: 'payment', data: s})} />;
     if (view === 'my_activity') return <MyActivity user={currentUser} posts={posts} transactions={transactions} />;
@@ -507,7 +524,16 @@ export default function App() {
           <button onClick={() => setView('services')} className="flex-shrink-0 w-36 h-24 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl text-white shadow-lg flex flex-col items-center justify-center"><Tag className="w-6 h-6 mb-1"/> <span className="font-bold">จองบริการ</span></button>
           <button onClick={() => setModal({open: true, type: 'create_post'})} className="flex-shrink-0 w-36 h-24 bg-white border-2 border-dashed border-blue-300 rounded-xl text-blue-500 flex flex-col items-center justify-center hover:bg-blue-50"><PlusCircle className="w-6 h-6 mb-1"/> <span className="font-bold">สร้างทริป</span></button>
         </div>
-        <div className="grid md:grid-cols-2 gap-6">{posts.map(post => (<Card key={post.id} onClick={()=>{setActiveTripDetail(post);}}><div className="h-48 relative"><img src={post.media} className="w-full h-full object-cover"/><div className="absolute bottom-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded"><MapPin className="w-3 h-3 inline"/> {post.location}</div></div><div className="p-3"><h4 className="font-bold">{post.title}</h4><div className="flex justify-between items-center mt-2 text-sm text-gray-500"><span>{post.author}</span><span className="text-blue-600 font-bold">{post.price>0?`฿${post.price}`:'ฟรี'}</span></div></div></Card>))}</div>
+        
+        <h3 className="font-bold text-gray-800 text-lg flex items-center gap-2"><TrendingUp className="text-blue-500"/> ฟีดล่าสุด</h3>
+        <div className="grid md:grid-cols-2 gap-6">
+          {posts.map(post => (
+            <Card key={post.id} onClick={()=>{setActiveTripDetail(post);}}>
+               <div className="h-48 relative"><img src={post.media} className="w-full h-full object-cover"/><div className="absolute bottom-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded"><MapPin className="w-3 h-3 inline"/> {post.location}</div></div>
+               <div className="p-3"><h4 className="font-bold">{post.title}</h4><div className="flex justify-between items-center mt-2 text-sm text-gray-500"><span>{post.author}</span><span className="text-blue-600 font-bold">{post.price>0?`฿${post.price.toLocaleString()}`:'ฟรี'}</span></div></div>
+            </Card>
+          ))}
+        </div>
       </div>
     );
   };
@@ -519,7 +545,7 @@ export default function App() {
       <nav className="bg-white border-b sticky top-0 z-40 shadow-sm px-4 h-16 flex justify-between items-center">
         <div className="flex items-center gap-3">
            <button onClick={() => setIsSidebarOpen(true)} className="p-2 hover:bg-gray-100 rounded-lg"><Menu /></button>
-           <div className="font-bold text-xl text-blue-600 flex items-center gap-2 cursor-pointer" onClick={() => { setView('dashboard'); setActiveChat(null); setActiveTripDetail(null); }}><Logo className="w-8 h-8"/> <span className="hidden sm:inline">TripbuddyTH</span></div>
+           <div className="font-bold text-xl text-blue-600 flex items-center gap-2 cursor-pointer" onClick={() => { setView('dashboard'); setActiveChat(null); setActiveTripDetail(null); }}><Logo className="w-8 h-8"/> <span className="hidden sm:inline">(Travel Website) ThaiBuddy</span></div>
         </div>
         <div className="flex items-center gap-3 cursor-pointer" onClick={() => setModal({open: true, type: 'profile'})}>
            <div className="text-right hidden sm:block"><div className="font-bold text-sm">{currentUser.name}</div><div className="text-xs text-gray-500 capitalize">{currentUser.role}</div></div>
@@ -530,7 +556,7 @@ export default function App() {
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} user={currentUser} onEditProfile={() => setModal({open: true, type: 'profile'})} onLogout={handleLogout} setView={setView} />
 
       <main className="max-w-5xl mx-auto p-4 mt-4">
-        {activeChat ? <ChatRoom trip={activeChat} currentUser={currentUser} onBack={() => setActiveChat(null)} onSendMessage={(t) => { const msg = { sender: currentUser.name, text: t, time: 'Now' }; setPosts(posts.map(p => p.id === activeChat.id ? { ...p, chat: [...p.chat, msg] } : p)); setActiveChat({ ...activeChat, chat: [...activeChat.chat, msg] }); }} /> :
+        {activeChat ? <ChatRoom trip={activeChat} currentUser={currentUser} onBack={() => setActiveChat(null)} onSendMessage={(t) => { const msg = { sender: currentUser.name, text: t, time: 'Now' }; const updated = posts.map(p => p.id === activeChat.id ? { ...p, chat: [...(p.chat||[]), msg] } : p); setPosts(updated); setActiveChat({...activeChat, chat: [...(activeChat.chat||[]), msg]}); }} /> :
          activeTripDetail ? <TripDetailModal post={activeTripDetail} user={currentUser} onClose={() => setActiveTripDetail(null)} onChat={() => { setActiveChat(activeTripDetail); setActiveTripDetail(null); }} onJoin={() => handleJoin(activeTripDetail)} usersDb={dbUsers} /> : 
          renderView()}
       </main>
@@ -539,16 +565,16 @@ export default function App() {
         <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4 backdrop-blur-sm animate-in zoom-in">
           <div className="bg-white rounded-2xl w-full max-w-md p-6 relative overflow-y-auto max-h-[90vh]">
             <button onClick={() => setModal({open: false})} className="absolute top-4 right-4 text-gray-400"><XCircle /></button>
-            {modal.type === 'profile' && <ProfileModal user={currentUser} onClose={() => setModal({open: false})} onSave={(d) => { setDbUsers(dbUsers.map(u => u.id === currentUser.id ? d : u)); setCurrentUser(d); setModal({ open: false }); }} />}
+            {modal.type === 'profile' && <ProfileModal user={currentUser} onClose={() => setModal({open: false})} onSave={(d) => { const upd = dbUsers.map(u => u.id === currentUser.id ? d : u); setDbUsers(upd); setCurrentUser({...currentUser, ...d}); setModal({ open: false }); }} />}
             {modal.type === 'payment' && (
               <div className="text-center space-y-4">
-                <div className="bg-blue-50 p-4 rounded-xl font-bold text-blue-800">฿{modal.data.price.toLocaleString()}</div>
+                <div className="bg-blue-50 p-4 rounded-xl font-bold text-blue-800">฿{(modal.data.price || 0).toLocaleString()}</div>
                 <div className="border-2 border-dashed p-10 rounded-xl text-gray-400">แนบสลิปที่นี่ (Demo)</div>
                 <Button variant="success" className="w-full" onClick={createPayment}>ส่งหลักฐาน</Button>
               </div>
             )}
             {modal.type === 'create_service' && (
-              <div className="space-y-4"><h3 className="font-bold text-xl">เพิ่มบริการใหม่</h3><div className="flex gap-2"><button onClick={() => setNewItem({...newItem, type: 'accommodation'})} className="flex-1 p-3 border rounded-xl flex flex-col items-center bg-blue-50 text-blue-600"><Building/> ที่พัก</button><button onClick={() => setNewItem({...newItem, type: 'transport'})} className="flex-1 p-3 border rounded-xl flex flex-col items-center bg-orange-50 text-orange-600"><Bus/> รถเช่า</button></div><input className="w-full border p-2 rounded-lg" placeholder="ชื่อบริการ" onChange={e => setNewItem({...newItem, name: e.target.value})} /><input className="w-full border p-2 rounded-lg" placeholder="สถานที่ (จังหวัด)" onChange={e => setNewItem({...newItem, location: e.target.value})} /><input className="w-full border p-2 rounded-lg" type="number" placeholder="ราคาเริ่มต้น" onChange={e => setNewItem({...newItem, price: parseInt(e.target.value)})} /><textarea className="w-full border p-2 rounded-lg" placeholder="รายละเอียด" onChange={e => setNewItem({...newItem, desc: e.target.value})} /><input className="w-full border p-2 rounded-lg" placeholder="URL รูป" onChange={e => setNewItem({...newItem, image: e.target.value})} /><Button onClick={createService} className="w-full">สร้างรายการ</Button></div>
+              <div className="space-y-4"><h3 className="font-bold text-xl">เพิ่มบริการใหม่</h3><div className="flex gap-2"><button onClick={() => setNewItem({...newItem, type: 'accommodation'})} className="flex-1 p-3 border rounded-xl flex flex-col items-center bg-blue-50 text-blue-600"><Building/> ที่พัก</button><button onClick={() => setNewItem({...newItem, type: 'transport'})} className="flex-1 p-3 border rounded-xl flex flex-col items-center bg-orange-50 text-orange-600"><Bus/> รถเช่า</button></div><input className="w-full border p-2 rounded-lg" placeholder="ชื่อบริการ" onChange={e => setNewItem({...newItem, name: e.target.value})} /><input className="w-full border p-2 rounded-lg" placeholder="สถานที่ (จังหวัด)" onChange={e => setNewItem({...newItem, location: e.target.value})} /><input className="w-full border p-2 rounded-lg" type="number" placeholder="ราคาเริ่มต้น" onChange={e => setNewItem({...newItem, price: parseInt(e.target.value)})} /><textarea className="w-full border p-2 rounded-lg" placeholder="รายละเอียด" onChange={e => setNewItem({...newItem, desc: e.target.value})} /><div className="mb-3"><label className="block text-sm font-medium text-gray-700 mb-1">รูปภาพประกอบ</label><div className="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center hover:bg-gray-50 transition-colors relative"><input type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={(e)=>{ const file = e.target.files[0]; if(file) { setTimeout(()=>{ handleServiceUpload('https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=600'); alert('อัปโหลดสำเร็จ!'); }, 1500); } }} accept="image/*" /><div className="flex flex-col items-center text-gray-400"><UploadCloud className="w-8 h-8 mb-2"/><span className="text-sm">คลิกเพื่อเลือกไฟล์รูปภาพ</span></div></div></div><Button onClick={createService} className="w-full">สร้างรายการ</Button></div>
             )}
             {modal.type === 'create_post' && (
               <div className="space-y-4">
@@ -559,7 +585,7 @@ export default function App() {
                 {newItem.type === 'trip' && (<><input className="w-full border p-2 rounded-lg" type="date" value={newItem.date || ''} onChange={e => setNewItem({...newItem, date: e.target.value})} /><input className="w-full border p-2 rounded-lg" placeholder="GPS" value={newItem.gps || ''} onChange={e => setNewItem({...newItem, gps: e.target.value})} /><input className="w-full border p-2 rounded-lg" type="number" placeholder="จำนวนคนสูงสุด" value={newItem.maxPeople || ''} onChange={e => setNewItem({...newItem, maxPeople: e.target.value})} /></>)}
                 <input className="w-full border p-2 rounded-lg" type="number" placeholder="ราคา (ใส่ 0 หากฟรี)" value={newItem.price || ''} onChange={e => setNewItem({...newItem, price: parseInt(e.target.value)})} />
                 <textarea className="w-full border p-2 rounded-lg h-24" placeholder="รายละเอียด" value={newItem.desc || ''} onChange={e => setNewItem({...newItem, desc: e.target.value})} />
-                <input className="w-full border p-2 rounded-lg" placeholder="URL รูป" value={newItem.media || ''} onChange={e => setNewItem({...newItem, media: e.target.value})} />
+                <FileUploader label="รูปปก/วิดีโอ" type={newItem.type==='video'?'video':'image'} onUpload={(url)=>setNewItem({...newItem, media:url})}/>
                 <Button className="w-full" onClick={() => { setPosts([{...newItem, id: Date.now(), author: currentUser.name, chat: [], likes: 0, participants: [], type: 'trip' }, ...posts]); setModal({open: false}); }}>โพสต์เลย</Button>
               </div>
             )}
