@@ -7,7 +7,7 @@ import {
   Star, Loader, DollarSign, FileText, Trash2, CreditCard, Search,
   BarChart2, Users, AlertCircle, Database, CalendarCheck, Clock, Ticket, Plane,
   Navigation, Calendar, Info, Building, Bus, Briefcase, Tag, FileImage, ExternalLink,
-  BedDouble, Car, Filter, Check, Upload, PlayCircle, ArrowRight, LogIn
+  BedDouble, Car, Filter, Check, Upload, PlayCircle, ArrowRight, LogIn, Eye, Image, Save
 } from 'lucide-react';
 
 // ==========================================
@@ -23,15 +23,197 @@ const Logo = ({ className }) => (
 );
 
 // ==========================================
-// 2. DATASETS (STATIC DATA)
+// 2. HELPER COMPONENTS
+// ==========================================
+const Button = ({ children, onClick, variant = 'primary', className = '', disabled = false }) => {
+  const variants = { primary: "bg-blue-600 text-white hover:bg-blue-700 shadow-md", secondary: "bg-white text-gray-700 border hover:bg-gray-50", success: "bg-green-600 text-white hover:bg-green-700 shadow-md", danger: "bg-red-50 text-red-600 hover:bg-red-100", outline: "border border-blue-600 text-blue-600 hover:bg-blue-50" };
+  return <button onClick={onClick} disabled={disabled} className={`px-4 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${variants[variant]} ${className}`}>{children}</button>;
+};
+
+const Card = ({ children, className = '', onClick }) => <div onClick={onClick} className={`bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer ${className}`}>{children}</div>;
+
+const Badge = ({ status }) => {
+  const styles = { verified: 'bg-green-100 text-green-700', pending: 'bg-yellow-100 text-yellow-700', active: 'bg-blue-100 text-blue-700', approved: 'bg-green-100 text-green-700', rejected: 'bg-red-100 text-red-700' };
+  const labels = { verified: 'ยืนยันแล้ว', pending: 'รอตรวจสอบ', active: 'ใช้งานปกติ', approved: 'อนุมัติแล้ว', rejected: 'ไม่อนุมัติ' };
+  return <span className={`px-2 py-0.5 rounded-full text-xs font-bold uppercase ${styles[status] || 'bg-gray-100'}`}>{labels[status] || status}</span>;
+};
+
+const calculateCountdown = (date) => {
+  if (!date) return null;
+  const diff = new Date(date) - new Date();
+  if (diff < 0) return "ออกเดินทางแล้ว";
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  return `อีก ${days} วัน`;
+};
+
+// --- FILE UPLOADER (Base64 for Real Persistence) ---
+const FileUploader = ({ label, onUpload, value, type = 'image' }) => {
+  const fileInputRef = useRef(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setLoading(true);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setTimeout(() => {
+          onUpload(reader.result); 
+          setLoading(false);
+        }, 800);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  return (
+    <div className="mb-4">
+      <label className="block text-sm font-medium text-gray-700 mb-2">{label}</label>
+      <div 
+        className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:bg-blue-50 hover:border-blue-300 transition-all cursor-pointer group"
+        onClick={() => fileInputRef.current.click()}
+      >
+        <input 
+          type="file" 
+          ref={fileInputRef}
+          className="hidden" 
+          onChange={handleFileChange} 
+          accept={type === 'video' ? "video/*" : "image/*"} 
+        />
+        
+        {loading ? (
+          <div className="flex flex-col items-center text-blue-600"><Loader className="w-8 h-8 animate-spin mb-2"/><span className="text-xs">กำลังประมวลผล...</span></div>
+        ) : value ? (
+          <div className="relative w-full h-48 bg-gray-100 rounded-lg overflow-hidden group/preview shadow-sm">
+            {type === 'video' ? <div className="w-full h-full flex flex-col items-center justify-center bg-black text-white"><Video className="w-12 h-12 mb-2"/><span className="text-xs">วิดีโอพร้อมใช้งาน</span></div> : <img src={value} className="w-full h-full object-contain bg-gray-50" alt="Preview" />}
+            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/preview:opacity-100 transition-opacity"><span className="text-white text-sm font-bold bg-black/60 px-3 py-1.5 rounded-full flex items-center gap-2 backdrop-blur-sm"><Edit className="w-4 h-4"/> เปลี่ยนรูปภาพ</span></div>
+            <div className="absolute top-2 right-2 bg-green-500 text-white p-1.5 rounded-full shadow-md"><CheckCircle className="w-4 h-4"/></div>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-4 text-gray-400 group-hover:text-blue-500 transition-colors"><div className="bg-gray-100 p-4 rounded-full mb-3 group-hover:bg-blue-100 transition-colors"><Upload className="w-8 h-8"/></div><span className="text-sm font-semibold">คลิกเพื่ออัปโหลด{type === 'video' ? 'วิดีโอ' : 'รูปภาพ'}</span><span className="text-xs opacity-70 mt-1">รองรับไฟล์จากเครื่องของคุณ</span></div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ==========================================
+// 3. DATASETS (FULL 77 PROVINCES)
 // ==========================================
 const THAILAND_DATA = {
-  north: { name: 'ภาคเหนือ (9)', color: 'bg-green-100 text-green-800', provinces: [{ name: 'เชียงใหม่', desc: 'ดอยอินทนนท์ ถนนคนเดิน', highlight: 'ดอยอินทนนท์' }, { name: 'เชียงราย', desc: 'วัดร่องขุ่น ดอยตุง', highlight: 'วัดร่องขุ่น' }, { name: 'น่าน', desc: 'กระซิบรัก ดอยเสมอดาว', highlight: 'ดอยเสมอดาว' }, { name: 'แม่ฮ่องสอน', desc: 'ปางอุ๋ง ทุ่งดอกบัวตอง', highlight: 'ปางอุ๋ง' }, { name: 'แพร่', desc: 'แพะเมืองผี', highlight: 'แพะเมืองผี' }, { name: 'พะเยา', desc: 'กว๊านพะเยา', highlight: 'กว๊านพะเยา' }, { name: 'ลำปาง', desc: 'เมืองรถม้า', highlight: 'วัดพระธาตุลำปางหลวง' }, { name: 'ลำพูน', desc: 'พระธาตุหริภุญชัย', highlight: 'พระธาตุหริภุญชัย' }, { name: 'อุตรดิตถ์', desc: 'ภูสอยดาว', highlight: 'ภูสอยดาว' }] },
-  northeast: { name: 'ภาคอีสาน (20)', color: 'bg-orange-100 text-orange-800', provinces: [{ name: 'นครราชสีมา', desc: 'เขาใหญ่', highlight: 'เขาใหญ่' }, { name: 'ขอนแก่น', desc: 'เมืองไดโนเสาร์', highlight: 'เขื่อนอุบลรัตน์' }, { name: 'อุดรธานี', desc: 'คำชะโนด', highlight: 'คำชะโนด' }, { name: 'อุบลราชธานี', desc: 'สามพันโบก', highlight: 'สามพันโบก' }, { name: 'หนองคาย', desc: 'บั้งไฟพญานาค', highlight: 'วัดผาตากเสื้อ' }, { name: 'เลย', desc: 'เชียงคาน ภูกระดึง', highlight: 'เชียงคาน' }, { name: 'บุรีรัมย์', desc: 'พนมรุ้ง', highlight: 'สนามช้าง' }, { name: 'สุรินทร์', desc: 'ถิ่นช้างใหญ่', highlight: 'หมู่บ้านช้าง' }, { name: 'ศรีสะเกษ', desc: 'ผามออีแดง', highlight: 'ผามออีแดง' }, { name: 'สกลนคร', desc: 'หนองหาร', highlight: 'วัดพระธาตุเชิงชุม' }] },
-  central: { name: 'ภาคกลาง (22)', color: 'bg-yellow-100 text-yellow-800', provinces: [{ name: 'กรุงเทพมหานคร', desc: 'วัดพระแก้ว', highlight: 'วัดอรุณฯ' }, { name: 'พระนครศรีอยุธยา', desc: 'เมืองเก่า', highlight: 'วัดมหาธาตุ' }, { name: 'สระบุรี', desc: 'น้ำตก', highlight: 'น้ำตกเจ็ดสาวน้อย' }, { name: 'ลพบุรี', desc: 'ลิง', highlight: 'พระปรางค์สามยอด' }, { name: 'สิงห์บุรี', desc: 'บางระจัน', highlight: 'วัดพิกุลทอง' }, { name: 'ชัยนาท', desc: 'สวนนก', highlight: 'เขื่อนเจ้าพระยา' }, { name: 'อ่างทอง', desc: 'ตุ๊กตาชาววัง', highlight: 'วัดม่วง' }, { name: 'นครสวรรค์', desc: 'ปากน้ำโพ', highlight: 'บึงบอระเพ็ด' }, { name: 'อุทัยธานี', desc: 'วัดท่าซุง', highlight: 'วัดท่าซุง' }, { name: 'กำแพงเพชร', desc: 'กล้วยไข่', highlight: 'น้ำตกคลองลาน' }, { name: 'สุโขทัย', desc: 'มรดกโลก', highlight: 'อุทยานประวัติศาสตร์' }, { name: 'พิษณุโลก', desc: 'พระพุทธชินราช', highlight: 'วัดพระศรีรัตนมหาธาตุ' }, { name: 'พิจิตร', desc: 'ชาละวัน', highlight: 'บึงสีไฟ' }, { name: 'เพชรบูรณ์', desc: 'เขาค้อ', highlight: 'เขาค้อ' }, { name: 'สุพรรณบุรี', desc: 'มังกร', highlight: 'บึงฉวาก' }, { name: 'นครปฐม', desc: 'เจดีย์', highlight: 'องค์พระปฐมเจดีย์' }, { name: 'สมุทรสาคร', desc: 'มหาชัย', highlight: 'ตลาดทะเลไทย' }, { name: 'สมุทรสงคราม', desc: 'อัมพวา', highlight: 'ตลาดร่มหุบ' }, { name: 'นนทบุรี', desc: 'เกาะเกร็ด', highlight: 'เกาะเกร็ด' }, { name: 'ปทุมธานี', desc: 'เมืองบัว', highlight: 'วัดเจดีย์หอย' }, { name: 'สมุทรปราการ', desc: 'ปากน้ำ', highlight: 'บางกระเจ้า' }, { name: 'นครนายก', desc: 'เขื่อน', highlight: 'เขื่อนขุนด่านฯ' }] },
-  east: { name: 'ภาคตะวันออก (7)', color: 'bg-blue-100 text-blue-800', provinces: [{ name: 'ชลบุรี', desc: 'พัทยา', highlight: 'เกาะล้าน' }, { name: 'ระยอง', desc: 'เสม็ด', highlight: 'สวนผลไม้' }, { name: 'จันทบุรี', desc: 'เนินนางพญา', highlight: 'จุดชมวิวเนินนางพญา' }, { name: 'ตราด', desc: 'เกาะช้าง', highlight: 'เกาะกูด' }, { name: 'ฉะเชิงเทรา', desc: 'หลวงพ่อโสธร', highlight: 'วัดโสธรวราราม' }, { name: 'ปราจีนบุรี', desc: 'ล่องแก่ง', highlight: 'แก่งหินเพิง' }, { name: 'สระแก้ว', desc: 'โรงเกลือ', highlight: 'ละลุ' }] },
-  west: { name: 'ภาคตะวันตก (5)', color: 'bg-amber-100 text-amber-800', provinces: [{ name: 'กาญจนบุรี', desc: 'สะพานข้ามแม่น้ำแคว', highlight: 'สังขละบุรี' }, { name: 'ตาก', desc: 'ทีลอซู', highlight: 'น้ำตกทีลอซู' }, { name: 'ประจวบคีรีขันธ์', desc: 'หัวหิน', highlight: 'อ่าวมะนาว' }, { name: 'เพชรบุรี', desc: 'ชะอำ', highlight: 'หาดชะอำ' }, { name: 'ราชบุรี', desc: 'สวนผึ้ง', highlight: 'สวนผึ้ง' }] },
-  south: { name: 'ภาคใต้ (14)', color: 'bg-cyan-100 text-cyan-800', provinces: [{ name: 'ภูเก็ต', desc: 'แหลมพรหมเทพ', highlight: 'แหลมพรหมเทพ' }, { name: 'สุราษฎร์ธานี', desc: 'สมุย', highlight: 'เขื่อนเชี่ยวหลาน' }, { name: 'นครศรีธรรมราช', desc: 'วัดเจดีย์ (ไอ้ไข่)', highlight: 'วัดเจดีย์ (ไอ้ไข่)' }, { name: 'สงขลา', desc: 'หาดใหญ่', highlight: 'นางเงือกทอง' }, { name: 'กระบี่', desc: 'พีพี', highlight: 'สระมรกต' }, { name: 'พังงา', desc: 'เสม็ดนางชี', highlight: 'หมู่เกาะสิมิลัน' }, { name: 'ตรัง', desc: 'หมูย่าง', highlight: 'ถ้ำมรกต' }, { name: 'สตูล', desc: 'หลีเป๊ะ', highlight: 'เกาะหลีเป๊ะ' }, { name: 'ชุมพร', desc: 'หาดทรายรี', highlight: 'หาดทรายรี' }, { name: 'ระนอง', desc: 'บ่อน้ำร้อน', highlight: 'ภูเขาหญ้า' }, { name: 'พัทลุง', desc: 'ทะเลน้อย', highlight: 'ทะเลน้อย' }, { name: 'ยะลา', desc: 'เบตง', highlight: 'Skywalk อัยเยอร์เวง' }, { name: 'ปัตตานี', desc: 'มัสยิดกลาง', highlight: 'มัสยิดกลาง' }, { name: 'นราธิวาส', desc: 'น้ำตก', highlight: 'น้ำตกปาโจ' }] }
+  north: { 
+      name: 'ภาคเหนือ (9)', 
+      color: 'bg-green-100 text-green-800', 
+      provinces: [
+          { name: 'เชียงใหม่', desc: 'ดอยอินทนนท์ ถนนคนเดินท่าแพ', highlight: 'ดอยอินทนนท์' },
+          { name: 'เชียงราย', desc: 'วัดร่องขุ่น ดอยตุง', highlight: 'วัดร่องขุ่น' },
+          { name: 'น่าน', desc: 'ดอยเสมอดาว กระซิบรัก', highlight: 'ดอยเสมอดาว' },
+          { name: 'แม่ฮ่องสอน', desc: 'ปางอุ๋ง ทุ่งดอกบัวตอง', highlight: 'ปางอุ๋ง' },
+          { name: 'แพร่', desc: 'พระธาตุช่อแฮ แพะเมืองผี', highlight: 'แพะเมืองผี' },
+          { name: 'พะเยา', desc: 'กว๊านพะเยา วัดติโลกอาราม', highlight: 'กว๊านพะเยา' },
+          { name: 'ลำปาง', desc: 'วัดพระธาตุลำปางหลวง เมืองรถม้า', highlight: 'วัดพระธาตุลำปางหลวง' },
+          { name: 'ลำพูน', desc: 'พระธาตุหริภุญชัย', highlight: 'พระธาตุหริภุญชัย' },
+          { name: 'อุตรดิตถ์', desc: 'ภูสอยดาว เมืองลับแล', highlight: 'ภูสอยดาว' }
+      ]
+  },
+  northeast: { 
+      name: 'ภาคอีสาน (20)', 
+      color: 'bg-orange-100 text-orange-800', 
+      provinces: [
+          { name: 'นครราชสีมา', desc: 'อุทยานแห่งชาติเขาใหญ่', highlight: 'เขาใหญ่' },
+          { name: 'ขอนแก่น', desc: 'เขื่อนอุบลรัตน์ ไดโนเสาร์', highlight: 'เขื่อนอุบลรัตน์' },
+          { name: 'อุดรธานี', desc: 'คำชะโนด ทะเลบัวแดง', highlight: 'คำชะโนด' },
+          { name: 'อุบลราชธานี', desc: 'สามพันโบก ผาแต้ม', highlight: 'สามพันโบก' },
+          { name: 'หนองคาย', desc: 'พญานาค วัดผาตากเสื้อ', highlight: 'วัดผาตากเสื้อ' },
+          { name: 'เลย', desc: 'เชียงคาน ภูกระดึง', highlight: 'เชียงคาน' },
+          { name: 'บุรีรัมย์', desc: 'ปราสาทพนมรุ้ง สนามช้าง', highlight: 'พนมรุ้ง' },
+          { name: 'สุรินทร์', desc: 'หมู่บ้านช้าง งานช้างแฟร์', highlight: 'หมู่บ้านช้าง' },
+          { name: 'ศรีสะเกษ', desc: 'ผามออีแดง ปราสาทสระกำแพงใหญ่', highlight: 'ผามออีแดง' },
+          { name: 'สกลนคร', desc: 'วัดพระธาตุเชิงชุม หนองหาร', highlight: 'วัดพระธาตุเชิงชุม' },
+          { name: 'นครพนม', desc: 'พระธาตุพนม พญาศรีสัตตนาคราช', highlight: 'พระธาตุพนม' },
+          { name: 'มุกดาหาร', desc: 'หอแก้วมุกดาหาร ตลาดอินโดจีน', highlight: 'หอแก้ว' },
+          { name: 'ยโสธร', desc: 'ประเพณีบั้งไฟ พญาคันคาก', highlight: 'พญาคันคาก' },
+          { name: 'ร้อยเอ็ด', desc: 'บึงพลาญชัย เจดีย์มหามงคลบัว', highlight: 'เจดีย์มหามงคลบัว' },
+          { name: 'กาฬสินธุ์', desc: 'พิพิธภัณฑ์สิรินธร ไดโนเสาร์', highlight: 'พิพิธภัณฑ์สิรินธร' },
+          { name: 'มหาสารคาม', desc: 'พระธาตุนาดูน สะดืออีสาน', highlight: 'พระธาตุนาดูน' },
+          { name: 'ชัยภูมิ', desc: 'ทุ่งดอกกระเจียว มอหินขาว', highlight: 'มอหินขาว' },
+          { name: 'อำนาจเจริญ', desc: 'พระมงคลมิ่งเมือง', highlight: 'พุทธอุทยาน' },
+          { name: 'หนองบัวลำภู', desc: 'วัดถ้ำกลองเพล', highlight: 'วัดถ้ำกลองเพล' },
+          { name: 'บึงกาฬ', desc: 'ภูทอก ถ้ำนาคา', highlight: 'ถ้ำนาคา' }
+      ]
+  },
+  central: { 
+      name: 'ภาคกลาง (22)', 
+      color: 'bg-yellow-100 text-yellow-800', 
+      provinces: [
+          { name: 'กรุงเทพมหานคร', desc: 'วัดพระแก้ว วัดอรุณฯ', highlight: 'วัดอรุณฯ' },
+          { name: 'พระนครศรีอยุธยา', desc: 'อุทยานประวัติศาสตร์', highlight: 'วัดมหาธาตุ' },
+          { name: 'สระบุรี', desc: 'น้ำตกเจ็ดสาวน้อย รอยพระพุทธบาท', highlight: 'น้ำตกเจ็ดสาวน้อย' },
+          { name: 'ลพบุรี', desc: 'พระปรางค์สามยอด เมืองลิง', highlight: 'พระปรางค์สามยอด' },
+          { name: 'สิงห์บุรี', desc: 'วัดพิกุลทอง ค่ายบางระจัน', highlight: 'วัดพิกุลทอง' },
+          { name: 'ชัยนาท', desc: 'สวนนกชัยนาท เขื่อนเจ้าพระยา', highlight: 'เขื่อนเจ้าพระยา' },
+          { name: 'อ่างทอง', desc: 'วัดม่วง พระพุทธรูปองค์ใหญ่', highlight: 'วัดม่วง' },
+          { name: 'นครสวรรค์', desc: 'บึงบอระเพ็ด ตรุษจีนปากน้ำโพ', highlight: 'บึงบอระเพ็ด' },
+          { name: 'อุทัยธานี', desc: 'วัดท่าซุง หุบป่าตาด', highlight: 'วัดท่าซุง' },
+          { name: 'กำแพงเพชร', desc: 'อุทยานประวัติศาสตร์ น้ำตกคลองลาน', highlight: 'น้ำตกคลองลาน' },
+          { name: 'สุโขทัย', desc: 'อุทยานประวัติศาสตร์สุโขทัย', highlight: 'อุทยานประวัติศาสตร์' },
+          { name: 'พิษณุโลก', desc: 'พระพุทธชินราช', highlight: 'วัดพระศรีรัตนมหาธาตุ' },
+          { name: 'พิจิตร', desc: 'บึงสีไฟ ชาละวัน', highlight: 'บึงสีไฟ' },
+          { name: 'เพชรบูรณ์', desc: 'เขาค้อ ภูทับเบิก', highlight: 'เขาค้อ' },
+          { name: 'สุพรรณบุรี', desc: 'บึงฉวาก ตลาดสามชุก', highlight: 'บึงฉวาก' },
+          { name: 'นครปฐม', desc: 'พระปฐมเจดีย์', highlight: 'องค์พระปฐมเจดีย์' },
+          { name: 'สมุทรสาคร', desc: 'ตลาดมหาชัย', highlight: 'ตลาดทะเลไทย' },
+          { name: 'สมุทรสงคราม', desc: 'ตลาดน้ำอัมพวา ดอนหอยหลอด', highlight: 'อัมพวา' },
+          { name: 'นนทบุรี', desc: 'เกาะเกร็ด', highlight: 'เกาะเกร็ด' },
+          { name: 'ปทุมธานี', desc: 'วัดเจดีย์หอย', highlight: 'วัดเจดีย์หอย' },
+          { name: 'สมุทรปราการ', desc: 'บางกระเจ้า เมืองโบราณ', highlight: 'บางกระเจ้า' },
+          { name: 'นครนายก', desc: 'เขื่อนขุนด่านปราการชล', highlight: 'เขื่อนขุนด่านฯ' }
+      ]
+  },
+  east: { 
+      name: 'ภาคตะวันออก (7)', 
+      color: 'bg-blue-100 text-blue-800', 
+      provinces: [
+          { name: 'ชลบุรี', desc: 'พัทยา บางแสน เกาะล้าน', highlight: 'เกาะล้าน' },
+          { name: 'ระยอง', desc: 'เกาะเสม็ด ทุ่งโปรงทอง', highlight: 'เกาะเสม็ด' },
+          { name: 'จันทบุรี', desc: 'เนินนางพญา ชุมชนริมน้ำจันทบูร', highlight: 'เนินนางพญา' },
+          { name: 'ตราด', desc: 'เกาะช้าง เกาะกูด', highlight: 'เกาะช้าง' },
+          { name: 'ฉะเชิงเทรา', desc: 'วัดโสธรวรารามวรวิหาร', highlight: 'วัดโสธรวราราม' },
+          { name: 'ปราจีนบุรี', desc: 'แก่งหินเพิง เวโรน่าทับลาน', highlight: 'แก่งหินเพิง' },
+          { name: 'สระแก้ว', desc: 'ตลาดโรงเกลือ ละลุ', highlight: 'ละลุ' }
+      ]
+  },
+  west: { 
+      name: 'ภาคตะวันตก (5)', 
+      color: 'bg-amber-100 text-amber-800', 
+      provinces: [
+          { name: 'กาญจนบุรี', desc: 'สะพานข้ามแม่น้ำแคว สังขละบุรี', highlight: 'สังขละบุรี' },
+          { name: 'ตาก', desc: 'น้ำตกทีลอซู เขื่อนภูมิพล', highlight: 'น้ำตกทีลอซู' },
+          { name: 'ประจวบคีรีขันธ์', desc: 'หัวหิน อ่าวมะนาว', highlight: 'หัวหิน' },
+          { name: 'เพชรบุรี', desc: 'หาดชะอำ เขาวัง', highlight: 'หาดชะอำ' },
+          { name: 'ราชบุรี', desc: 'สวนผึ้ง ตลาดน้ำดำเนินสะดวก', highlight: 'สวนผึ้ง' }
+      ]
+  },
+  south: { 
+      name: 'ภาคใต้ (14)', 
+      color: 'bg-cyan-100 text-cyan-800', 
+      provinces: [
+          { name: 'ภูเก็ต', desc: 'แหลมพรหมเทพ หาดป่าตอง', highlight: 'แหลมพรหมเทพ' },
+          { name: 'สุราษฎร์ธานี', desc: 'เกาะสมุย เขื่อนเชี่ยวหลาน', highlight: 'เขื่อนเชี่ยวหลาน' },
+          { name: 'นครศรีธรรมราช', desc: 'วัดเจดีย์ (ไอ้ไข่) คีรีวง', highlight: 'วัดเจดีย์ (ไอ้ไข่)' },
+          { name: 'สงขลา', desc: 'หาดใหญ่ แหลมสมิหลา', highlight: 'นางเงือกทอง' },
+          { name: 'กระบี่', desc: 'หมู่เกาะพีพี สระมรกต', highlight: 'สระมรกต' },
+          { name: 'พังงา', desc: 'เสม็ดนางชี หมู่เกาะสิมิลัน', highlight: 'หมู่เกาะสิมิลัน' },
+          { name: 'ตรัง', desc: 'เมืองหมูย่าง', highlight: 'ถ้ำมรกต' },
+          { name: 'สตูล', desc: 'เกาะหลีเป๊ะ อุทยานธรณี', highlight: 'เกาะหลีเป๊ะ' },
+          { name: 'ชุมพร', desc: 'หาดทรายรี จุดชมวิวเขามัทรี', highlight: 'หาดทรายรี' },
+          { name: 'ระนอง', desc: 'เมืองฝนแปดแดดสี่', highlight: 'ภูเขาหญ้า' },
+          { name: 'พัทลุง', desc: 'ล่องแก่ง', highlight: 'ทะเลน้อย' },
+          { name: 'ยะลา', desc: 'เบตง สกายวอล์คอัยเยอร์เวง', highlight: 'Skywalk อัยเยอร์เวง' },
+          { name: 'ปัตตานี', desc: 'เมืองงามสามวัฒนธรรม', highlight: 'มัสยิดกลาง' },
+          { name: 'นราธิวาส', desc: 'น้ำตกปาโจ ป่าพรุโต๊ะแดง', highlight: 'น้ำตกปาโจ' }
+      ]
+  }
 };
 
 const TOURISM_STATS = [
@@ -56,7 +238,7 @@ const INITIAL_USERS = [
   { id: 2, username: 'guide1', password: '123', role: 'guide', name: 'ไกด์สมศรี', status: 'verified', image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200', contact: 'Line: @somsri', verifyRequest: 'ไกด์เชียงใหม่' },
   { id: 3, username: 'admin', password: '123', role: 'admin', name: 'Admin', status: 'verified', image: '', contact: '' },
   { id: 4, username: 'hotel1', password: '123', role: 'business', name: 'The View Hotel', status: 'verified', image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=200', contact: '02-999-9999', bizType: 'accommodation', verifyRequest: 'โรงแรม 5 ดาวใจกลางเมือง' },
-  { id: 5, username: 'van1', password: '123', role: 'business', name: 'ลุงตู่ รถตู้ซิ่ง', status: 'pending', image: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=200', contact: '081-111-1111', bizType: 'transport', verifyRequest: 'บริการรถตู้ VIP เชียงใหม่' }
+  { id: 5, username: 'van1', password: '123', role: 'business', name: 'ลุงตู่ รถตู้ซิ่ง', status: 'pending', image: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=200', contact: '081-111-1111', bizType: 'transport', verifyRequest: 'บริการรถตู้ VIP เชียงใหม่', joinedAt: '2024-03-02' }
 ];
 
 const INITIAL_POSTS = [
@@ -94,12 +276,12 @@ const INITIAL_POSTS = [
   },
   { 
     id: 3, 
-    title: 'เชียงใหม่หน้าฝน 🌧️', 
+    title: 'Vlog: เชียงใหม่หน้าฝน 🌧️', 
     location: 'เชียงใหม่', 
     author: 'Alex Explorer', 
-    type: 'trip', 
-    media:  'https://i.ytimg.com/vi/NreWirmZAVg/maxresdefault.jpg?w=600', 
-    desc: 'พาไปดูนาขั้นบันไดที่ป่าบงเปียง สวยมากกก ๆ ช่วงนี้ต้นข้าวกำลังเขียวขจีเลยครับ 🌾🌾🌾',
+    type: 'video', 
+    media: 'https://www.youtube.com/embed/dQw4w9WgXcQ', 
+    desc: 'พาไปดูนาขั้นบันไดที่ป่าบงเปียง สวยมากกก',
     chat: [], 
     likes: 88, 
     price: 0, 
@@ -116,92 +298,7 @@ const INITIAL_TRANSACTIONS = [
   { id: 101, from: 'นักเดินทาง Alex', to: 'ไกด์สมศรี', amount: 4990, date: '2024-02-15', status: 'pending', slip: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=200', postId: 1, title: 'โปรฯ ภูเก็ต 3 วัน 2 คืน' }
 ];
 
-// --- COMPONENTS ---
-const Button = ({ children, onClick, variant = 'primary', className = '', disabled = false }) => {
-  const variants = { primary: "bg-blue-600 text-white hover:bg-blue-700 shadow-md", secondary: "bg-white text-gray-700 border hover:bg-gray-50", success: "bg-green-600 text-white hover:bg-green-700 shadow-md", danger: "bg-red-50 text-red-600 hover:bg-red-100", outline: "border border-blue-600 text-blue-600 hover:bg-blue-50" };
-  return <button onClick={onClick} disabled={disabled} className={`px-4 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${variants[variant]} ${className}`}>{children}</button>;
-};
-const Card = ({ children, className = '', onClick }) => <div onClick={onClick} className={`bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer ${className}`}>{children}</div>;
-const Badge = ({ status }) => {
-  const styles = { verified: 'bg-green-100 text-green-700', pending: 'bg-yellow-100 text-yellow-700', active: 'bg-blue-100 text-blue-700', approved: 'bg-green-100 text-green-700', rejected: 'bg-red-100 text-red-700' };
-  return <span className={`px-2 py-0.5 rounded-full text-xs font-bold uppercase ${styles[status] || 'bg-gray-100'}`}>{status === 'approved' ? 'อนุมัติแล้ว' : status === 'pending' ? 'รอตรวจสอบ' : status === 'verified' ? 'ยืนยันแล้ว' : status}</span>;
-};
-const calculateCountdown = (date) => {
-  if (!date) return null;
-  const diff = new Date(date) - new Date();
-  if (diff < 0) return "ออกเดินทางแล้ว";
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-  return `อีก ${days} วัน`;
-};
-
-// --- FILE UPLOADER (LOCAL FILE PREVIEW - INSTANT) ---
-const FileUploader = ({ label, onUpload, value, type = 'image' }) => {
-  const fileInputRef = useRef(null);
-  const [loading, setLoading] = useState(false);
-
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setLoading(true);
-      // Simulate processing time then create local URL
-      setTimeout(() => {
-        const objectUrl = URL.createObjectURL(file);
-        onUpload(objectUrl);
-        setLoading(false);
-      }, 500);
-    }
-  };
-
-  return (
-    <div className="mb-4">
-      <label className="block text-sm font-medium text-gray-700 mb-2">{label}</label>
-      <div 
-        className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:bg-blue-50 hover:border-blue-300 transition-all cursor-pointer group"
-        onClick={() => fileInputRef.current.click()}
-      >
-        <input 
-          type="file" 
-          ref={fileInputRef}
-          className="hidden" 
-          onChange={handleFileChange} 
-          accept={type === 'video' ? "video/*" : "image/*"} 
-        />
-        
-        {loading ? (
-          <div className="flex flex-col items-center text-blue-600">
-            <Loader className="w-8 h-8 animate-spin mb-2"/>
-            <span className="text-xs">กำลังประมวลผล...</span>
-          </div>
-        ) : value ? (
-          <div className="relative w-full h-48 bg-gray-100 rounded-lg overflow-hidden group/preview shadow-sm">
-            {type === 'video' ? (
-               <div className="w-full h-full flex flex-col items-center justify-center bg-black text-white">
-                 <Video className="w-12 h-12 mb-2"/>
-                 <span className="text-xs">วิดีโอพร้อมใช้งาน</span>
-               </div>
-            ) : (
-               <img src={value} className="w-full h-full object-cover" alt="Preview" />
-            )}
-            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/preview:opacity-100 transition-opacity">
-              <span className="text-white text-sm font-bold bg-black/60 px-3 py-1.5 rounded-full flex items-center gap-2 backdrop-blur-sm"><Edit className="w-4 h-4"/> เปลี่ยนรูปภาพ</span>
-            </div>
-            <div className="absolute top-2 right-2 bg-green-500 text-white p-1.5 rounded-full shadow-md"><CheckCircle className="w-4 h-4"/></div>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center py-4 text-gray-400 group-hover:text-blue-500 transition-colors">
-            <div className="bg-gray-100 p-4 rounded-full mb-3 group-hover:bg-blue-100 transition-colors">
-               <Upload className="w-8 h-8"/>
-            </div>
-            <span className="text-sm font-semibold">คลิกเพื่ออัปโหลด{type === 'video' ? 'วิดีโอ' : 'รูปภาพ'}</span>
-            <span className="text-xs opacity-70 mt-1">รองรับไฟล์จากเครื่องของคุณ</span>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-// --- HERO SECTION (NEW) ---
+// --- HERO SECTION ---
 const HeroSection = ({ onExplore }) => (
   <div className="relative h-[450px] rounded-3xl overflow-hidden mb-10 shadow-2xl group">
     <img src="https://images.unsplash.com/photo-1596422846543-75c6fc197f07?w=1600&q=80" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" />
@@ -218,7 +315,6 @@ const HeroSection = ({ onExplore }) => (
   </div>
 );
 
-// --- SUB-COMPONENTS ---
 const ServiceCard = ({ service, onBook }) => (
   <div className="bg-white rounded-xl shadow-sm border overflow-hidden hover:shadow-md transition-all group">
     <div className="h-40 overflow-hidden relative">
@@ -262,7 +358,6 @@ const TripDetailModal = ({ post, user, onClose, onJoin, onChat, usersDb }) => {
           </div>
         </div>
         <div className="p-6 overflow-y-auto flex-1 space-y-6">
-          
           <div className="flex justify-between items-center bg-indigo-50 p-4 rounded-xl border border-indigo-100">
             <div>
                <div className="text-xs font-bold text-indigo-600 uppercase tracking-wider">วันเดินทาง</div>
@@ -273,32 +368,14 @@ const TripDetailModal = ({ post, user, onClose, onJoin, onChat, usersDb }) => {
                <div className="text-2xl font-bold text-blue-600">{post.price > 0 ? `฿${post.price.toLocaleString()}` : 'ฟรี'}</div>
             </div>
           </div>
-
-          <div>
-             <h3 className="font-bold text-gray-800 mb-2 flex items-center gap-2"><Info className="w-4 h-4"/> รายละเอียดทริป</h3>
-             <p className="text-gray-600 text-sm bg-gray-50 p-4 rounded-xl leading-relaxed whitespace-pre-line border border-gray-100">{post.desc}</p>
-          </div>
-
+          <div><h3 className="font-bold text-gray-800 mb-2 flex items-center gap-2"><Info className="w-4 h-4"/> รายละเอียดทริป</h3><p className="text-gray-600 text-sm bg-gray-50 p-4 rounded-xl leading-relaxed whitespace-pre-line border border-gray-100">{post.desc}</p></div>
           <div className="grid grid-cols-2 gap-4">
             <div className="border p-3 rounded-xl hover:bg-gray-50 transition-colors"><div className="text-xs text-gray-400 mb-1">สถานที่หลัก</div><div className="text-sm font-bold flex items-center gap-1"><MapPin className="w-4 h-4 text-red-500"/>{post.location}</div></div>
             <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer" className="border p-3 rounded-xl hover:bg-blue-50 transition-colors cursor-pointer group"><div className="text-xs text-gray-400 mb-1">พิกัด GPS (กดเพื่อนำทาง)</div><div className="text-sm font-bold flex items-center gap-1 text-blue-600 group-hover:underline"><Navigation className="w-4 h-4"/> {post.gps || '-'} <ExternalLink className="w-3 h-3 ml-1"/></div></a>
           </div>
-
-          <div>
-             <div className="flex justify-between text-sm font-bold mb-2 text-gray-700"><span>เพื่อนร่วมทริป ({post.participants?.length || 0}/{post.maxPeople})</span></div>
-             <div className="flex -space-x-2 overflow-hidden py-1">
-                {participantAvatars.length > 0 ? participantAvatars.map((img, i) => (<img key={i} className="h-8 w-8 rounded-full border-2 border-white object-cover" src={img} />)) : <span className="text-sm text-gray-400">ยังไม่มีผู้เข้าร่วม</span>}
-             </div>
-          </div>
+          <div><div className="flex justify-between text-sm font-bold mb-2 text-gray-700"><span>เพื่อนร่วมทริป ({post.participants?.length || 0}/{post.maxPeople})</span></div><div className="flex -space-x-2 overflow-hidden py-1">{participantAvatars.length > 0 ? participantAvatars.map((img, i) => (<img key={i} className="h-8 w-8 rounded-full border-2 border-white object-cover" src={img} />)) : <span className="text-sm text-gray-400">ยังไม่มีผู้เข้าร่วม</span>}</div></div>
         </div>
-
-        <div className="p-4 border-t bg-gray-50 flex gap-3">
-          <button onClick={onChat} className="flex-1 py-3 bg-white border border-gray-300 rounded-xl font-bold text-gray-700 hover:bg-gray-100 flex items-center justify-center gap-2 transition-colors"><MessageSquare className="w-4 h-4"/> พูดคุย</button>
-          {!isJoined ? 
-            <button onClick={onJoin} className="flex-[2] py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all transform active:scale-95">{post.price > 0 ? 'จองทริปทันที' : 'ขอเข้าร่วมฟรี'}</button> 
-            : <button className="flex-[2] py-3 bg-green-500 text-white rounded-xl font-bold cursor-default flex items-center justify-center gap-2"><CheckCircle className="w-5 h-5"/> เข้าร่วมแล้ว</button>
-          }
-        </div>
+        <div className="p-4 border-t bg-gray-50 flex gap-3"><button onClick={onChat} className="flex-1 py-3 bg-white border border-gray-300 rounded-xl font-bold text-gray-700 hover:bg-gray-100 flex items-center justify-center gap-2 transition-colors"><MessageSquare className="w-4 h-4"/> พูดคุย</button>{!isJoined ? <button onClick={onJoin} className="flex-[2] py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all transform active:scale-95">{post.price > 0 ? 'จองทริปทันที' : 'ขอเข้าร่วมฟรี'}</button> : <button className="flex-[2] py-3 bg-green-500 text-white rounded-xl font-bold cursor-default flex items-center justify-center gap-2"><CheckCircle className="w-5 h-5"/> เข้าร่วมแล้ว</button>}</div>
       </div>
     </div>
   );
@@ -409,10 +486,39 @@ const MyActivity = ({ user, posts, transactions }) => {
   );
 };
 
-const AdminPanel = ({ users, transactions, services, onVerifyUser, onDeleteUser, onApprovePayment, onApproveService }) => {
+// ** ADMIN PANEL WITH EDIT FEATURE **
+const AdminPanel = ({ users, transactions, services, onVerifyUser, onDeleteUser, onApprovePayment, onApproveService, onUpdateUser }) => {
   const [tab, setTab] = useState('users');
+  const [editingUser, setEditingUser] = useState(null);
+  const [editForm, setEditForm] = useState({ name: '', role: 'traveler', status: 'verified' });
+
+  useEffect(() => {
+    if (editingUser) setEditForm(editingUser);
+  }, [editingUser]);
+
   return (
     <div className="space-y-6">
+      {editingUser && (
+        <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4">
+            <div className="bg-white p-6 rounded-xl w-full max-w-sm shadow-2xl">
+                <h3 className="text-xl font-bold mb-4">แก้ไขข้อมูลผู้ใช้</h3>
+                <div className="space-y-3">
+                    <input className="w-full border p-2 rounded" placeholder="ชื่อ" value={editForm.name || ''} onChange={e => setEditForm({...editForm, name: e.target.value})} />
+                    <select className="w-full border p-2 rounded" value={editForm.role || 'traveler'} onChange={e => setEditForm({...editForm, role: e.target.value})}>
+                        <option value="traveler">Traveler</option><option value="guide">Guide</option><option value="business">Business</option><option value="admin">Admin</option>
+                    </select>
+                    <select className="w-full border p-2 rounded" value={editForm.status || 'verified'} onChange={e => setEditForm({...editForm, status: e.target.value})}>
+                        <option value="verified">Verified</option><option value="pending">Pending</option>
+                    </select>
+                </div>
+                <div className="flex gap-2 mt-4">
+                    <Button onClick={() => setEditingUser(null)} variant="secondary" className="flex-1">ยกเลิก</Button>
+                    <Button onClick={() => { onUpdateUser(editingUser.id, editForm); setEditingUser(null); }} className="flex-1">บันทึก</Button>
+                </div>
+            </div>
+        </div>
+      )}
+
       <div className="flex items-center gap-3 mb-6"><div className="bg-orange-100 p-3 rounded-xl"><Database className="w-6 h-6 text-orange-600"/></div><div><h2 className="text-2xl font-bold text-gray-800">Admin Dashboard</h2><p className="text-gray-500 text-sm">จัดการระบบและอนุมัติข้อมูล</p></div></div>
       <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
          <button onClick={() => setTab('users')} className={`px-5 py-2 rounded-full font-bold transition-all ${tab === 'users' ? 'bg-blue-600 text-white shadow-lg' : 'bg-white border text-gray-600 hover:bg-gray-50'}`}>สมาชิก ({users.length})</button>
@@ -421,9 +527,18 @@ const AdminPanel = ({ users, transactions, services, onVerifyUser, onDeleteUser,
          <button onClick={() => setTab('payments')} className={`px-5 py-2 rounded-full font-bold transition-all ${tab === 'payments' ? 'bg-green-600 text-white shadow-lg' : 'bg-white border text-gray-600 hover:bg-gray-50'}`}>การเงิน ({transactions.length})</button>
       </div>
       <div className="bg-white rounded-2xl shadow-sm border overflow-hidden">
-        {tab === 'users' && <div className="overflow-x-auto"><table className="w-full text-left text-sm"><thead className="bg-gray-50 text-gray-600"><tr><th className="p-4">User</th><th className="p-4">Role</th><th className="p-4">Status</th><th className="p-4 text-right">Action</th></tr></thead><tbody className="divide-y">{users.map(u => (<tr key={u.id} className="hover:bg-gray-50"><td className="p-4 flex items-center gap-3"><img src={u.image||"https://ui-avatars.com/api/?name="+u.name} className="w-8 h-8 rounded-full bg-gray-200"/> <span className="font-bold">{u.name}</span></td><td className="p-4"><span className="bg-gray-100 px-2 py-1 rounded text-xs uppercase font-bold">{u.role}</span></td><td className="p-4"><Badge status={u.status}/></td><td className="p-4 text-right">{u.role!=='admin'&&<button onClick={()=>onDeleteUser('users', u.id)} className="text-red-500 hover:bg-red-50 p-2 rounded-full"><Trash2 className="w-4 h-4"/></button>}</td></tr>))}</tbody></table></div>}
-        {tab === 'verify' && <div className="divide-y">{users.filter(u => u.status === 'pending').length === 0 ? <div className="p-8 text-center text-gray-400">ไม่มีรายการรออนุมัติ</div> : users.filter(u => u.status === 'pending').map(u => (<div key={u.id} className="p-4 flex justify-between items-center hover:bg-gray-50"><div><div className="font-bold text-lg">{u.name}</div><div className="text-sm text-gray-500">{u.role.toUpperCase()} • {u.verifyRequest}</div></div><div className="flex gap-2"><Button onClick={() => onVerifyUser(u.id, 'rejected')} variant="danger" className="text-xs">ปัดตก</Button><Button onClick={() => onVerifyUser(u.id, 'verified')} variant="success" className="text-xs">อนุมัติ</Button></div></div>))}</div>}
+        {tab === 'users' && <div className="overflow-x-auto"><table className="w-full text-left text-sm"><thead className="bg-gray-50 text-gray-600"><tr><th className="p-4">User</th><th className="p-4">Role</th><th className="p-4">Status</th><th className="p-4 text-right">Action</th></tr></thead><tbody className="divide-y">{users.map(u => (<tr key={u.id} className="hover:bg-gray-50"><td className="p-4 flex items-center gap-3"><img src={u.image||"https://ui-avatars.com/api/?name="+u.name} className="w-8 h-8 rounded-full bg-gray-200"/> <span className="font-bold">{u.name}</span></td><td className="p-4"><span className="bg-gray-100 px-2 py-1 rounded text-xs uppercase font-bold">{u.role}</span></td><td className="p-4"><Badge status={u.status}/></td><td className="p-4 text-right flex justify-end gap-2"><button onClick={() => setEditingUser(u)} className="text-blue-500 hover:bg-blue-50 p-2 rounded-full"><Edit className="w-4 h-4"/></button>{u.role!=='admin'&&<button onClick={()=>onDeleteUser('users', u.id)} className="text-red-500 hover:bg-red-50 p-2 rounded-full"><Trash2 className="w-4 h-4"/></button>}</td></tr>))}</tbody></table></div>}
+        
+        {tab === 'verify' && <div className="divide-y">{users.filter(u => u.status === 'pending').length === 0 ? <div className="p-8 text-center text-gray-400">ไม่มีรายการรออนุมัติ</div> : users.filter(u => u.status === 'pending').map(u => (<div key={u.id} className="p-4 flex flex-col gap-3 hover:bg-gray-50 border-b">
+          <div className="flex justify-between items-start">
+             <div><div className="font-bold text-lg">{u.name}</div><div className="text-sm text-gray-500">{u.role.toUpperCase()} • {u.verifyRequest}</div></div>
+             <div className="flex gap-2"><Button onClick={() => onVerifyUser(u.id, 'rejected')} variant="danger" className="text-xs">ปัดตก</Button><Button onClick={() => onVerifyUser(u.id, 'verified')} variant="success" className="text-xs">อนุมัติ</Button></div>
+          </div>
+          {u.idCardImage && <div className="bg-gray-100 p-3 rounded-lg"><p className="text-xs text-gray-500 mb-2 font-bold flex items-center gap-1"><CreditCard className="w-3 h-3"/> หลักฐานยืนยันตัวตน:</p><img src={u.idCardImage} className="w-full h-48 object-contain rounded border bg-white cursor-pointer hover:scale-105 transition-transform" onClick={() => { const w = window.open(""); w.document.write(`<img src="${u.idCardImage}" style="width:100%"/>`); }} /></div>}
+        </div>))}</div>}
+        
         {tab === 'services' && <div className="divide-y">{services.filter(s => s.status === 'pending').length===0?<div className="p-8 text-center text-gray-400">ไม่มีบริการใหม่</div>:services.filter(s => s.status === 'pending').map(s => (<div key={s.id} className="p-4 flex gap-4 hover:bg-gray-50"><img src={s.image} className="w-24 h-24 rounded-lg object-cover bg-gray-200"/><div className="flex-1"> <div className="font-bold text-lg">{s.name}</div><div className="text-sm text-gray-500 mb-2">โดย {s.owner} • {s.location}</div><div className="flex gap-2"><Button onClick={() => onApproveService(s.id, 'rejected')} variant="danger" className="text-xs">ไม่อนุมัติ</Button><Button onClick={() => onApproveService(s.id, 'approved')} variant="success" className="text-xs">อนุมัติลงเว็บ</Button></div></div></div>))}</div>}
+        
         {tab === 'payments' && <div className="divide-y">{transactions.filter(t => t.status === 'pending').length===0?<div className="p-8 text-center text-gray-400">ไม่มีรายการโอนเงิน</div>:transactions.filter(t => t.status === 'pending').map(t => (<div key={t.id} className="p-4 flex justify-between items-center hover:bg-gray-50"><div><div className="font-bold text-blue-600 text-lg">฿{t.amount.toLocaleString()}</div><div className="text-sm text-gray-600">จาก {t.from}</div><div className="text-xs text-gray-400">{t.date}</div></div><Button onClick={() => onApprovePayment(t.id, t.from, t.postId)} variant="success" className="w-full text-xs">ยืนยันยอด</Button></div>))}</div>}
       </div>
     </div>
@@ -487,7 +602,9 @@ const ProfileModal = ({ user, onClose, onSave }) => {
         <FileUploader label="เปลี่ยนรูปโปรไฟล์" type="image" onUpload={(url) => setFormData({...formData, image: url})} />
         <div><label className="text-xs font-bold text-gray-500">ข้อมูลติดต่อ</label><input className="w-full border p-2 rounded-lg" value={formData.contact || ''} onChange={e => setFormData({...formData, contact: e.target.value})} placeholder="Line / Tel" /></div></div><Button onClick={() => onSave(formData)} className="w-full mt-2">บันทึกการเปลี่ยนแปลง</Button></div>
       ) : (
-        <div className="text-center space-y-4 py-4">{formData.status === 'verified' ? <div className="text-green-600 py-6 animate-in zoom-in"><ShieldCheck className="w-20 h-20 mx-auto mb-4"/><h3 className="font-bold text-xl">ยืนยันตัวตนแล้ว</h3><p className="text-sm opacity-80">บัญชีของคุณปลอดภัยและน่าเชื่อถือ</p></div> : formData.status === 'pending' ? <div className="text-yellow-600 py-6 animate-in zoom-in"><Loader className="w-20 h-20 mx-auto mb-4 animate-spin"/><h3 className="font-bold text-xl">รอการตรวจสอบ</h3><p className="text-sm opacity-80">แอดมินกำลังตรวจสอบข้อมูลของคุณ</p></div> : <><div className="bg-blue-50 p-4 rounded-xl text-left text-sm text-gray-600 mb-4">การยืนยันตัวตนช่วยเพิ่มความน่าเชื่อถือให้กับบัญชีของคุณ โปรดกรอกรายละเอียดเกี่ยวกับตัวคุณหรือธุรกิจของคุณ</div><textarea className="w-full border p-3 rounded-lg h-32 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="พิมพ์รายละเอียดเพื่อยืนยันตัวตน..." value={verifyText} onChange={e => setVerifyText(e.target.value)} /><Button onClick={() => { onSave({ ...formData, verifyRequest: verifyText, status: 'pending' }); alert('ส่งคำขอแล้ว'); }} variant="success" className="w-full">ส่งตรวจสอบ</Button></>}</div>
+        <div className="text-center space-y-4 py-4">{formData.status === 'verified' ? <div className="text-green-600 py-6 animate-in zoom-in"><ShieldCheck className="w-20 h-20 mx-auto mb-4"/><h3 className="font-bold text-xl">ยืนยันตัวตนแล้ว</h3><p className="text-sm opacity-80">บัญชีของคุณปลอดภัยและน่าเชื่อถือ</p></div> : formData.status === 'pending' ? <div className="text-yellow-600 py-6 animate-in zoom-in"><Loader className="w-20 h-20 mx-auto mb-4 animate-spin"/><h3 className="font-bold text-xl">รอการตรวจสอบ</h3><p className="text-sm opacity-80">แอดมินกำลังตรวจสอบข้อมูลของคุณ</p></div> : <><div className="bg-blue-50 p-4 rounded-xl text-left text-sm text-gray-600 mb-4">การยืนยันตัวตนช่วยเพิ่มความน่าเชื่อถือให้กับบัญชีของคุณ โปรดอัปโหลดรูปถ่ายบัตรประชาชนเพื่อยืนยันตัวตน</div>
+        <FileUploader label="รูปถ่ายบัตรประชาชน (สำหรับตรวจสอบ)" type="image" onUpload={(url) => setFormData({ ...formData, idCardImage: url })} />
+        <textarea className="w-full border p-3 rounded-lg h-20 focus:ring-2 focus:ring-blue-500 outline-none mb-3" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)..." value={verifyText} onChange={e => setVerifyText(e.target.value)} /><Button onClick={() => { onSave({ ...formData, verifyRequest: verifyText || 'ขอตรวจสอบข้อมูล', status: 'pending' }); alert('ส่งคำขอแล้ว'); }} variant="success" className="w-full">ส่งตรวจสอบ</Button></>}</div>
       )}
     </div>
   );
@@ -498,10 +615,10 @@ const ThailandDiscovery = () => {
   const [selectedProv, setSelectedProv] = useState(null);
   return (
     <div className="space-y-6 animate-in slide-in-from-bottom duration-300">
-      <div className="bg-gradient-to-r from-teal-500 to-emerald-600 rounded-2xl p-8 text-white text-center shadow-lg relative overflow-hidden"><div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-16 -mt-16"></div><h2 className="text-3xl font-bold mb-2 flex items-center justify-center gap-2 relative z-10"><Map className="w-8 h-8"/> 77 จังหวัดทั่วไทย</h2><p className="text-teal-100 relative z-10">ค้นหาข้อมูลท่องเที่ยว จุดเช็คอิน และของดีประจำจังหวัด</p></div>
-      <div className="flex flex-wrap gap-2 justify-center sticky top-20 z-30 bg-[#F8F9FA] py-2">{Object.keys(THAILAND_DATA).map(key => (<button key={key} onClick={() => setActiveRegion(key)} className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${activeRegion === key ? 'bg-teal-600 text-white shadow-md transform scale-105' : 'bg-white text-gray-600 border hover:bg-gray-50'}`}>{THAILAND_DATA[key].name}</button>))}</div>
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">{THAILAND_DATA[activeRegion].provinces.map((prov, idx) => (<div key={idx} onClick={() => setSelectedProv(prov)} className={`cursor-pointer rounded-xl p-4 border bg-white hover:shadow-lg transition-all hover:-translate-y-1 group`}><div className="font-bold text-gray-800 group-hover:text-teal-600 transition-colors">{prov.name}</div><div className="text-xs text-gray-500 mt-2 flex items-center gap-1"><Star className="w-3 h-3 text-yellow-400 fill-yellow-400"/> {prov.highlight}</div></div>))}</div>
-      {selectedProv && <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setSelectedProv(null)}><div className="bg-white rounded-2xl w-full max-w-sm p-6 relative animate-in zoom-in shadow-2xl" onClick={e => e.stopPropagation()}><button onClick={() => setSelectedProv(null)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><XCircle/></button><div className="text-center"><div className="w-20 h-20 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl font-bold text-teal-600 border-4 border-white shadow">{selectedProv.name[0]}</div><h3 className="text-2xl font-bold mb-2 text-gray-800">{selectedProv.name}</h3><div className="inline-block bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-bold mb-6">⭐ {selectedProv.highlight}</div><p className="text-gray-600 mb-8 bg-gray-50 p-4 rounded-xl text-sm">{selectedProv.desc}</p><Button className="w-full shadow-lg shadow-blue-200" onClick={() => window.open(`https://www.google.com/search?q=ที่เที่ยว${selectedProv.name}`, '_blank')}>ค้นหาข้อมูลเพิ่มเติมบน Google</Button></div></div></div>}
+      <div className="bg-gradient-to-r from-teal-500 to-emerald-600 rounded-2xl p-8 text-white text-center shadow-lg"><h2 className="text-3xl font-bold mb-2 flex items-center justify-center gap-2"><Map className="w-8 h-8"/> 77 จังหวัดทั่วไทย</h2></div>
+      <div className="flex flex-wrap gap-2 justify-center">{Object.keys(THAILAND_DATA).map(key => (<button key={key} onClick={() => setActiveRegion(key)} className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${activeRegion === key ? 'bg-blue-600 text-white shadow-md' : 'bg-white text-gray-600 border hover:bg-gray-50'}`}>{THAILAND_DATA[key].name}</button>))}</div>
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">{THAILAND_DATA[activeRegion].provinces.map((prov, idx) => (<div key={idx} onClick={() => setSelectedProv(prov)} className={`cursor-pointer rounded-xl p-4 border bg-white hover:shadow-lg transition-all`}><div className="font-bold">{prov.name}</div><div className="text-xs opacity-70"><Star className="w-3 h-3 inline"/> {prov.highlight}</div></div>))}</div>
+      {selectedProv && <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setSelectedProv(null)}><div className="bg-white rounded-2xl w-full max-w-sm p-6 relative animate-in zoom-in shadow-2xl" onClick={e => e.stopPropagation()}><button onClick={() => setSelectedProv(null)} className="absolute top-4 right-4 text-gray-400"><XCircle/></button><div className="text-center"><div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold text-blue-600">{selectedProv.name[0]}</div><h3 className="text-2xl font-bold mb-2">{selectedProv.name}</h3><div className="inline-block bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-bold mb-4">⭐ {selectedProv.highlight}</div><p className="text-gray-600">{selectedProv.desc}</p><Button className="w-full mt-6" onClick={() => window.open(`https://www.google.com/search?q=ที่เที่ยว${selectedProv.name}`, '_blank')}>ค้นหาข้อมูล</Button></div></div></div>}
     </div>
   );
 };
@@ -523,33 +640,59 @@ export default function App() {
   const [regForm, setRegForm] = useState({ username: '', name: '', role: 'traveler', password: '', confirmPassword: '' });
   const [notification, setNotification] = useState(null);
 
-  // Persistence V30 (Demo - LocalStorage)
+  // Persistence V35 (Final Fix)
   useEffect(() => {
-    const s = localStorage.getItem('tb_session_v30'); if (s) setCurrentUser(JSON.parse(s));
-    const u = localStorage.getItem('tb_users_v30'); if (u) setDbUsers(JSON.parse(u));
-    const p = localStorage.getItem('tb_posts_v30'); if (p) setPosts(JSON.parse(p));
-    const sv = localStorage.getItem('tb_services_v30'); if (sv) setServices(JSON.parse(sv));
-    const t = localStorage.getItem('tb_trans_v30'); if (t) setTransactions(JSON.parse(t));
+    const s = localStorage.getItem('tb_session_v35'); if (s) setCurrentUser(JSON.parse(s));
+    const u = localStorage.getItem('tb_users_v35'); if (u) setDbUsers(JSON.parse(u));
+    const p = localStorage.getItem('tb_posts_v35'); if (p) setPosts(JSON.parse(p));
+    const sv = localStorage.getItem('tb_services_v35'); if (sv) setServices(JSON.parse(sv));
+    const t = localStorage.getItem('tb_trans_v35'); if (t) setTransactions(JSON.parse(t));
   }, []);
-  useEffect(() => { localStorage.setItem('tb_users_v30', JSON.stringify(dbUsers)); }, [dbUsers]);
-  useEffect(() => { localStorage.setItem('tb_posts_v30', JSON.stringify(posts)); }, [posts]);
-  useEffect(() => { localStorage.setItem('tb_services_v30', JSON.stringify(services)); }, [services]);
-  useEffect(() => { localStorage.setItem('tb_trans_v30', JSON.stringify(transactions)); }, [transactions]);
-  useEffect(() => { if (currentUser) { localStorage.setItem('tb_session_v30', JSON.stringify(currentUser)); } else { localStorage.removeItem('tb_session_v30'); } }, [currentUser]);
+  useEffect(() => { localStorage.setItem('tb_users_v35', JSON.stringify(dbUsers)); }, [dbUsers]);
+  useEffect(() => { localStorage.setItem('tb_posts_v35', JSON.stringify(posts)); }, [posts]);
+  useEffect(() => { localStorage.setItem('tb_services_v35', JSON.stringify(services)); }, [services]);
+  useEffect(() => { localStorage.setItem('tb_trans_v35', JSON.stringify(transactions)); }, [transactions]);
+  useEffect(() => { if (currentUser) { localStorage.setItem('tb_session_v35', JSON.stringify(currentUser)); } else { localStorage.removeItem('tb_session_v35'); } }, [currentUser]);
 
   // Handlers
-  const handleLogin = (e) => { e.preventDefault(); const u = dbUsers.find(x => x.username === loginForm.username && x.password === loginForm.password); if (u) {setCurrentUser(u); setView('dashboard');} else alert('ผิดพลาด'); };
-  const handleRegister = async (e) => { e.preventDefault(); if (regForm.password !== regForm.confirmPassword) return setNotification({message:'รหัสไม่ตรง',type:'error'}); 
-    const newUser = { ...regForm, id: Date.now(), status: regForm.role==='traveler'?'verified':'pending', joinedAt: new Date().toLocaleDateString(), image:'', contact:'' };
-    setDbUsers([...dbUsers, newUser]);
-    setNotification({message:'สำเร็จ!',type:'success'}); setTimeout(()=>setView('login'),1500); 
+  const handleLogin = (e) => { 
+      e.preventDefault(); 
+      const u = dbUsers.find(x => x.username === loginForm.username && x.password === loginForm.password); 
+      if (u) { setCurrentUser(u); setView('dashboard'); } 
+      else alert('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง'); 
   };
+  
+  const handleRegister = (e) => { 
+      e.preventDefault(); 
+      if (regForm.password !== regForm.confirmPassword) return setNotification({message:'รหัสไม่ตรง',type:'error'}); 
+      
+      const newUser = { 
+          ...regForm, 
+          id: Date.now(), 
+          status: regForm.role==='traveler'?'verified':'pending', 
+          joinedAt: new Date().toLocaleDateString(), 
+          image:'', 
+          contact:'' 
+      };
+      
+      const updatedUsers = [...dbUsers, newUser];
+      setDbUsers(updatedUsers);
+      localStorage.setItem('tb_users_v35', JSON.stringify(updatedUsers));
+      
+      setNotification({message:'สำเร็จ! กรุณาเข้าสู่ระบบ',type:'success'}); 
+      setTimeout(() => {
+          setView('login'); 
+          setNotification(null);
+      }, 1500); 
+  };
+  
   const handleLogout = () => { setCurrentUser(null); setView('landing'); };
   
   const createService = () => { setServices([...services, {...newItem, id: Date.now(), owner: currentUser.name, status: 'pending'}]); setModal({open: false}); };
   const createPost = () => { setPosts([{...newItem, id: Date.now(), author: currentUser.name, chat: [], likes: 0, participants: [], type: 'trip' }, ...posts]); setModal({open: false}); };
   
   const verifyUser = (id, status) => { setDbUsers(dbUsers.map(u => u.id === id ? { ...u, status } : u)); };
+  const handleAdminUpdateUser = (id, updatedData) => { setDbUsers(dbUsers.map(u => u.id === id ? { ...u, ...updatedData } : u)); };
   const onDeleteUser = (type, id) => { if(confirm('ลบ?')) setDbUsers(dbUsers.filter(u => u.id !== id)); };
   const approveService = (id, status) => { setServices(services.map(s => s.id === id ? { ...s, status } : s)); };
   
@@ -595,7 +738,9 @@ export default function App() {
 
   const renderView = () => {
     if (view === 'auth') return <AuthScreen view="login" setView={setView} loginForm={loginForm} setLoginForm={setLoginForm} regForm={regForm} setRegForm={setRegForm} handleLogin={handleLogin} handleRegister={handleRegister} notification={notification} />;
-    if (currentUser?.role === 'admin' && view === 'admin') return <AdminPanel users={dbUsers} services={services} transactions={transactions} onVerifyUser={verifyUser} onDeleteUser={onDeleteUser} onApprovePayment={handleApprovePayment} onApproveService={approveService} />;
+    if (view === 'login') return <AuthScreen view="login" setView={setView} loginForm={loginForm} setLoginForm={setLoginForm} regForm={regForm} setRegForm={setRegForm} handleLogin={handleLogin} handleRegister={handleRegister} notification={notification} />;
+    
+    if (currentUser?.role === 'admin' && view === 'admin') return <AdminPanel users={dbUsers} services={services} transactions={transactions} onVerifyUser={verifyUser} onDeleteUser={onDeleteUser} onApprovePayment={handleApprovePayment} onApproveService={approveService} onUpdateUser={handleAdminUpdateUser} />;
     if (currentUser?.role === 'business' && view === 'business_dash') return <BusinessDashboard user={currentUser} services={services} onCreateService={()=>{setModal({open:true, type:'create_service'}); setNewItem({});}} />;
     if (view === 'services') return <ServiceMarketplace services={services} onBook={(s) => requireAuth(() => setModal({open: true, type: 'payment', data: s}))} />;
     if (currentUser && view === 'my_activity') return <MyActivity user={currentUser} posts={posts} transactions={transactions} />;
@@ -604,7 +749,21 @@ export default function App() {
     // Default: Dashboard / Landing Page
     return (
       <div className="space-y-6 animate-in fade-in">
-        {!currentUser && <HeroSection onExplore={() => document.getElementById('feed').scrollIntoView({behavior: 'smooth'})} />}
+        <div className="relative h-[450px] rounded-3xl overflow-hidden mb-10 shadow-2xl group">
+            <img src="https://images.unsplash.com/photo-1596422846543-75c6fc197f07?w=1600&q=80" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center px-4">
+            <div className="animate-in slide-in-from-bottom duration-700 fade-in">
+                <h1 className="text-4xl md:text-6xl font-extrabold mb-4 drop-shadow-lg tracking-tight">เที่ยวไทย...ไปกับเพื่อนรู้ใจ</h1>
+                <p className="text-lg md:text-2xl mb-8 font-light opacity-90 max-w-2xl mx-auto drop-shadow-md">ค้นหาประสบการณ์การเดินทางใหม่ๆ จองที่พักและรถเช่าท้องถิ่น หรือหาเพื่อนร่วมทริปได้ง่ายๆ ที่นี่</p>
+                {!currentUser && (
+                    <button onClick={() => document.getElementById('feed').scrollIntoView({behavior: 'smooth'})} className="bg-white text-blue-600 px-8 py-4 rounded-full font-bold text-lg hover:bg-blue-50 transition-all shadow-xl hover:shadow-2xl flex items-center gap-2 mx-auto transform hover:-translate-y-1">
+                    เริ่มออกเดินทาง <ArrowRight className="w-5 h-5"/>
+                    </button>
+                )}
+            </div>
+            </div>
+        </div>
         
         {currentUser && (
            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8 flex items-center justify-between">
@@ -654,6 +813,8 @@ export default function App() {
     );
   };
 
+  if (!currentUser) return <AuthScreen view={view} setView={setView} loginForm={loginForm} setLoginForm={setLoginForm} regForm={regForm} setRegForm={setRegForm} handleLogin={handleLogin} handleRegister={handleRegister} notification={notification} />;
+
   return (
     <div className="min-h-screen bg-[#F8F9FA] text-slate-900 font-sans pb-20">
       <nav className="bg-white/90 backdrop-blur-md border-b sticky top-0 z-40 shadow-sm px-4 h-16 flex justify-between items-center transition-all">
@@ -685,7 +846,13 @@ export default function App() {
         <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4 backdrop-blur-sm animate-in zoom-in">
           <div className="bg-white rounded-2xl w-full max-w-md p-6 relative overflow-y-auto max-h-[90vh] shadow-2xl">
             <button onClick={() => setModal({open: false})} className="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition-colors"><XCircle/></button>
-            {modal.type === 'profile' && <ProfileModal user={currentUser} onClose={() => setModal({open: false})} onSave={(d) => { const upd = dbUsers.map(u => u.id === currentUser.id ? d : u); setDbUsers(upd); setCurrentUser({...currentUser, ...d}); setModal({ open: false }); }} />}
+            {modal.type === 'profile' && <ProfileModal user={currentUser} onClose={() => setModal({open: false})} onSave={(d) => { 
+                const upd = dbUsers.map(u => u.id === currentUser.id ? d : u); 
+                setDbUsers(upd); 
+                localStorage.setItem('tb_users_v35', JSON.stringify(upd)); // Update global DB
+                setCurrentUser({...currentUser, ...d}); 
+                setModal({ open: false }); 
+            }} />}
             {modal.type === 'payment' && (
               <div className="text-center space-y-4">
                 <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100">
